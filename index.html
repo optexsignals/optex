@@ -124,13 +124,26 @@ In the past, I’ve mentored traders privately. In the future, I may choose to o
 If you’d like to be informed if I decide to open anything up, leave your email below.
 </p>
 
-<form name="interest" method="POST" data-netlify="true">
-    <input type="hidden" name="form-name" value="interest">
-    <input type="email" name="email" placeholder="Your email address" required>
-    <button type="submit">Notify Me</button>
-</form>
-</div>
+<form
+  name="interest"
+  method="POST"
+  data-netlify="true"
+  netlify-honeypot="company"
+>
+  <input type="hidden" name="form-name" value="interest">
+  <input type="hidden" name="company">
 
+  <input
+    type="email"
+    name="email"
+    placeholder="Your email address"
+    required
+  >
+
+  <button type="submit">Notify Me</button>
+</form>
+
+</div>
 </div>
 </section>
 
