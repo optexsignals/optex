@@ -1,108 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance | Market Timing Model</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body { text-align: center; }
-        header {
-            background-image: url('hawk.png');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
-        }
-        header img {
-            width: 180px;
-            max-width: 90%;
-        }
-        nav {
-            background: #1F2833;
-            padding: 10px;
-        }
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        section {
-            text-align: center;
-            max-width: 1000px;
-            margin: auto;
-            padding: 40px;
-        }
-        table {
-            margin: 30px auto;
-            text-align: center;
-            width: 100%;
-            border-collapse: collapse;
-        }
-        td, th {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
-        }
-        img {
-            display: block;
-            margin: 20px auto;
-        }
-        footer {
-            text-align: center;
-            padding: 20px;
-            background: #1F2833;
-            color: white;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OptEx</title>
+
+<style>
+:root {
+    --bg-dark: #0f1115;
+    --bg-mid: #151922;
+    --text-main: #e6ebf2;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    line-height: 1.7;
+}
+
+.hero {
+    min-height: 100vh;
+    background:
+        linear-gradient(rgba(15,17,21,0.78), rgba(15,17,21,0.92)),
+        url("hawk.png") center / cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.hero-inner {
+    max-width: 900px;
+    text-align: justify;
+}
+
+.hero p {
+    font-size: 1.05rem;
+    margin-bottom: 22px;
+}
+
+.cta {
+    margin-top: 40px;
+    padding: 32px;
+    background: var(--bg-mid);
+    border-radius: 8px;
+    text-align: center;
+}
+
+form {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+}
+
+input[type="email"] {
+    width: 100%;
+    max-width: 420px;
+    padding: 14px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+}
+
+button {
+    padding: 14px 30px;
+    border-radius: 6px;
+    border: none;
+    background: var(--text-main);
+    color: #000;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover { opacity: 0.9; }
+
+a {
+    color: var(--text-main);
+}
+
+.footer {
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+</style>
 </head>
+
 <body>
 
-<header>
-    <img src="optex logo.png" alt="Optex Logo">
-</header>
+<section class="hero">
+<div class="hero-inner">
 
-<nav>
-    <a href="index.html">Home</a>
-    <a href="#about">About Me</a>
-    <a href="#model">How It Works</a>
-    <a href="#performance">Performance</a>
-    <a href="https://x.com/optexsignals" target="_blank">Real-Time Analysis & Signals</a>
-</nav>
+<p>
+I’m an experienced trader and portfolio manager with a background at some of the world’s largest financial institutions. I now trade full-time, managing my own capital using primarily systematic, rules-based strategies across markets and timeframes.
+</p>
 
-<section id="about">
-    <h2>About Me</h2>
-    <p>I am a data-driven investor with a background in quantitative finance and systematic trading. Having worked across multiple asset classes in some of the world's largest financial institutions on both the sell side (investment banks) as well as the buy side (Hedge funds & money managers), I have been building financial trading models for over 15 years and I am now looking to share the fruits of my labour with a select audience of finance professionals and experienced traders. The models that I trade are very logical and can be explained using a number of widely proven characteristics of financial markets including, human psychology/investor behaviour as well as volatility clustering, momentum factor and risk premium harvesting.</p>
+<p>
+Since October 2023, I’ve been publicly sharing one of my core equity index strategies on X. Over that period, the real-time signals from the model have generated +140%, compared with +69% for the Nasdaq 100, the underlying market the strategy trades. All trades were posted in real time.
+</p>
+
+<p>
+I’ve entered the 2026 U.S. Investing Championship to publicly showcase an aggressive sleeve of my portfolio which has no bearing on the signals I have been sharing on X.
+</p>
+
+<p>
+For now, I’m remaining anonymous and publishing under <a href="https://x.com/OptexSignals" target="_blank">OptexSignals on X</a>. I don’t currently sell anything. There are no subscriptions, paid signals, or courses. I make my living trading my own capital.
+</p>
+
+<p>
+In the past, I’ve mentored traders privately. In the future, I may choose to offer products or services whether through mentoring, managed capital, signals, or educational material.
+</p>
+
+<div class="cta">
+<p>
+If you’d like to be informed if I decide to open anything up, leave your email below.
+</p>
+
+<form name="interest" method="POST" data-netlify="true">
+    <input type="hidden" name="form-name" value="interest">
+    <input type="email" name="email" placeholder="Your email address" required>
+    <button type="submit">Notify Me</button>
+</form>
+</div>
+
+</div>
 </section>
 
-<section id="model">
-    <h2>How the Model Works</h2>
-    <p>The model dynamically adjusts exposure to QQQ based on long-term and short-term signals. The premise to the long term model is the following core belief around which I have built the signals for the model:</p>
-    <p>I think of bull markets like forest fires. They usually start with a spark — some catalyst that lights things up when investors are underinvested. That underexposure acts like dry kindling: it doesn’t take much to get things going. Early on, everything catches — the rally is broad, fast, and feeds on itself as more capital rushes in. But over time, the fuel starts to dry up. Weaker stocks start to roll over — their earnings disappoint, their narratives fray. Leadership narrows, participation fades, and momentum weakens. Eventually, there’s not enough left to sustain it. And when the structure’s hollowed out beneath the surface, the collapse often comes quickly — just like the final phase of a fire.</p>
-    <p>The premise to the short term model is the following core belief:</p>
-    <p>Levered/short term investors behave in a loss aversion, greed/fear based framework, buying when prices rise and selling when prices fall which causes sharp reversals in prices in the 1 day - 2 week time horizon as their positions get tested by underlying flows and macro data. The short term model looks to take advantage of these short term overreactions by scaling in to long exposure as the market shows signs of capitulation selling and then scaling out of long exposure when the market shows signs of upside exhaustion. </p>
-</section>
-
-<section id="performance">
-    <h2>Historical Performance</h2>
-    <p>Backtested results showing superior risk-adjusted returns versus QQQ Buy & Hold.</p>
-</section>
-
-<section>
-    <h2> Model Performance</h2>
-    <img src="equity_curve_full.png" alt="Short-Term Model Equity Curve" style="width:90%; max-width:1000px; border:1px solid #ccc;">
-</section>
-
-<section id="realtime">
-    <h2>Real-Time Analysis & Signals</h2>
-    <p>Follow live market insights and exposure updates on our official X.com feed.</p>
-    <p><a href="https://x.com/optexsignals" target="_blank">x.com/optexsignals</a></p>
-</section>
-
-<footer>
-    &copy; 2025 OptEX Market Timing Model. All rights reserved.
+<footer class="footer">
+© 2026 OptEx. Not investment advice.
 </footer>
 
 </body>
