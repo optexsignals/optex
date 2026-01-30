@@ -8,8 +8,7 @@
 <style>
 :root {
     --bg-dark: #0f1115;
-    --bg-mid: #151922;
-    --text-main: #e6ebf2;
+    --text-main: #e6ebf2; /* slightly blue off-white */
 }
 
 * { box-sizing: border-box; }
@@ -43,16 +42,12 @@ body {
     margin-bottom: 22px;
 }
 
-.cta {
-    margin-top: 40px;
-    padding: 32px;
-    background: var(--bg-mid);
-    border-radius: 8px;
-    text-align: center;
+a {
+    color: var(--text-main);
 }
 
 form {
-    margin-top: 18px;
+    margin-top: 30px;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -79,10 +74,8 @@ button {
     cursor: pointer;
 }
 
-button:hover { opacity: 0.9; }
-
-a {
-    color: var(--text-main);
+button:hover {
+    opacity: 0.9;
 }
 
 .footer {
@@ -112,15 +105,17 @@ I’ve entered the 2026 U.S. Investing Championship to publicly showcase an aggr
 </p>
 
 <p>
-For now, I’m remaining anonymous and publishing under <a href="https://x.com/OptexSignals" target="_blank">OptexSignals on X</a>. I don’t currently sell anything. There are no subscriptions, paid signals, or courses. I make my living trading my own capital.
+For now, I’m remaining anonymous and publishing under
+<a href="https://x.com/OptexSignals" target="_blank">OptexSignals on X</a>.
+I don’t currently sell anything. There are no subscriptions, paid signals, or courses.
+I make my living trading my own capital.
 </p>
 
 <p>
 In the past, I’ve mentored traders privately. In the future, I may choose to offer products or services whether through mentoring, managed capital, signals, or educational material.
 </p>
 
-<div class="cta">
-<p>
+<p style="text-align:center; margin-top:40px;">
 If you’d like to be informed if I decide to open anything up, leave your email below.
 </p>
 
@@ -143,7 +138,6 @@ If you’d like to be informed if I decide to open anything up, leave your email
   <button type="submit">Notify Me</button>
 </form>
 
-</div>
 </div>
 </section>
 
