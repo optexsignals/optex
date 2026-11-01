@@ -1,260 +1,144 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OptEx Model — How it works</title>
-<meta name="description" content="A systematic, regime-aware model for QQQ. How it reads the market cycle and sizes exposure.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{
-  --ink:#0E1B2A;
-  --paper:#F7F8FA;
-  --panel:#FFFFFF;
-  --rule:#DFE4EA;
-  --muted:#5A6B7D;
-  --accum:#1A9850;
-  --liq:#E0952A;
-  --data:#1F5FBF;
-  --measure:none;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:var(--paper);color:var(--ink);
-  font-family:"Source Serif 4",Georgia,serif;font-size:18px;line-height:1.7;
-  -webkit-font-smoothing:antialiased;
-}
-h1,h2,h3,.display{font-family:Archivo,"Helvetica Neue",sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.08;margin:0}
-.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
-.wrap{max-width:980px;margin:0 auto;padding:0 32px}
-
-/* ---------- hero ---------- */
-.hero{padding:88px 0 56px;border-bottom:1px solid var(--rule)}
-.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.hero h1{font-size:clamp(40px,6.4vw,76px);margin:18px 0 0;max-width:18ch}
-.hero .lede{max-width:none;margin-top:24px;font-size:21px;color:#22374B}
-
-/* signature: regime ribbon built from the model's actual regime blocks */
-.ribbon{margin-top:48px}
-.ribbon-track{display:flex;height:26px;border-radius:3px;overflow:hidden;background:var(--rule)}
-.seg{height:100%;transform-origin:left center}
-.seg.accum{background:var(--accum)}
-.seg.liq{background:var(--liq)}
-.ribbon-scale{display:flex;justify-content:space-between;margin-top:9px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
-.ribbon-key{display:flex;gap:26px;margin-top:18px;flex-wrap:wrap;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
-.ribbon-key span{display:flex;align-items:center;gap:8px}
-.dot{width:11px;height:11px;border-radius:2px;display:inline-block}
-
-@media (prefers-reduced-motion:no-preference){
-  .seg{animation:grow .9s cubic-bezier(.22,.61,.36,1) both}
-  .seg:nth-child(1){animation-delay:.15s}
-  .seg:nth-child(2){animation-delay:.33s}
-  .seg:nth-child(3){animation-delay:.51s}
-  .seg:nth-child(4){animation-delay:.69s}
-  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
-  .reveal.in{opacity:1;transform:none}
-}
-
-/* ---------- sections ---------- */
-section{padding:72px 0;border-bottom:1px solid var(--rule)}
-.sec-head{display:flex;gap:18px;align-items:baseline;margin-bottom:8px}
-.tick{width:4px;align-self:stretch;border-radius:2px;flex:0 0 4px}
-.tick.accum{background:var(--accum)}
-.tick.liq{background:var(--liq)}
-.tick.data{background:var(--data)}
-.tick.ink{background:var(--ink)}
-h2{font-size:clamp(27px,3.4vw,38px);max-width:22ch}
-.sub{color:var(--muted);font-size:15px;margin-top:6px;font-family:"IBM Plex Mono",monospace;letter-spacing:.03em}
-p{max-width:none}
-p+p{margin-top:1.05em}
-strong{font-weight:600}
-
-/* how-it-works pillars */
-.pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:38px}
-@media (max-width:640px){.pillars{grid-template-columns:1fr}}
-.pillar{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:22px 22px 24px}
-.pillar h3{font-size:17px;margin-bottom:8px}
-.pillar p{font-size:16px;color:#2C3F52;margin:0;max-width:none}
-.pillar .num{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.1em;display:block;margin-bottom:12px}
-
-/* figures */
-figure{margin:38px 0 0;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:16px}
-figure img{width:100%;height:auto;display:block;border-radius:3px}
-figcaption{margin-top:14px;padding:0 4px 2px;font-size:15.5px;color:var(--muted);max-width:none}
-
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin-top:38px}
-.stat{background:var(--panel);padding:22px 20px}
-.stat .k{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.stat .v{font-family:Archivo,sans-serif;font-weight:700;font-size:33px;margin-top:7px;letter-spacing:-.02em}
-.stat .c{font-size:14px;color:var(--muted);margin-top:3px}
-
-.note{margin-top:26px;font-size:15px;color:var(--muted);max-width:none}
-footer{padding:52px 0 72px;font-size:14.5px;color:var(--muted)}
-footer p{max-width:none}
-a{color:var(--data)}
-</style>
+<title>OPTEX — the all-weather stock portfolio</title>
+<meta name="description" content="Know what to buy, when to buy, and when to protect: a rules-based stock portfolio, published free every day before the open.">
+<meta property="og:title" content="OPTEX — the all-weather stock portfolio">
+<meta property="og:description" content="Know what to buy, when to buy, and when to protect: a rules-based stock portfolio, published free every day before the open.">
+<meta property="og:image" content="https://optexmodel.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff">
+<link rel="alternate" type="application/rss+xml" title="OPTEX" href="feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=1793575607">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2315171a'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='white' text-anchor='middle'>O</text></svg>">
 </head>
 <body>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="eyebrow">OptEx Model — Nasdaq 100 / QQQ</div>
-    <h1>The market is not one market. It is a cycle of regimes.</h1>
-    <p class="lede">OptEx reads where the market sits in that cycle, then trades the playbook that fits it — holding a core position when conditions support it, standing down when they don't, and trading the swings around it either way.</p>
-
-    <div class="ribbon" aria-label="Model regime history, January 2024 to July 2026">
-      <div class="ribbon-track">
-        <div class="seg accum" style="width:33.33%"></div>
-        <div class="seg liq"   style="width:17.68%"></div>
-        <div class="seg accum" style="width:39.75%"></div>
-        <div class="seg liq"   style="width:9.24%"></div>
-      </div>
-      <div class="ribbon-scale"><span>01/2024</span><span>07/2026</span></div>
-      <div class="ribbon-key">
-        <span><i class="dot" style="background:var(--accum)"></i> Accumulation / Early–Mid Bull</span>
-        <span><i class="dot" style="background:var(--liq)"></i> Mature Bull / Liquidation</span>
-      </div>
+<header class="mast"><div class="wrap">
+  <a class="mark" href="index.html">OPTEX<small>All-weather stock portfolio</small></a>
+  <nav class="nav"><a href="index.html" aria-current="page">Home</a><a href="how-it-works.html">How it works</a><a href="performance.html">Performance</a><a href="archive.html">Archive</a><a class="cta" href="portfolio.html">Today's portfolio</a></nav>
+</div></header>
+<main class="lp">
+<section class="lp-hero"><div class="wrap">
+  <div class="lp-hero-text" id="signup">
+    <h1>Know <span class="c-core">what</span> to buy,<br><span class="c-contra">when</span> to buy,<br>and when to <span class="c-compass">protect.</span></h1>
+    <div class="lp-hero-side">
+      <p class="lede">A rules-based portfolio that takes the guesswork out of investing, built to profit whether markets rise or fall.</p>
+      <form class="signup" name="daily" method="POST" data-netlify="true" netlify-honeypot="company" action="thanks.html">
+      <input type="hidden" name="form-name" value="daily">
+      <p hidden><label>Company <input name="company"></label></p>
+      <input type="email" name="email" required placeholder="Your email address" aria-label="Email address" autocomplete="email">
+      <button type="submit">Get it free</button>
+    </form>
+    <p class="fine">One email a day, before the open. Free. Unsubscribe any time.</p>
+      <p class="more"><a href="portfolio.html">See today's portfolio →</a></p>
     </div>
   </div>
-</header>
+  <figure class="lp-hero-chart"><div class="chart-head"><span><i class="ln p"></i>OPTEX all-weather stock portfolio</span><span><i class="ln g"></i>S&amp;P 500</span></div><div class="chart" id="hero-chart"></div></figure>
+</div></section>
 
-<section class="reveal">
-  <div class="wrap">
-    <div class="sec-head"><div class="tick ink"></div><div>
-      <h2>How the model works</h2>
-      <div class="sub">Two engines, two timeframes</div>
-    </div></div>
+<section class="wrap lp-stats" id="stats"></section>
 
-    <p>Markets cycle between periods when buyers absorb supply easily and periods when forced selling overwhelms them. Those two states behave differently in almost every measurable way — how volatility behaves, whether moves persist or reverse, how far a sell-off runs before it finds a bid. A strategy that works beautifully in one is often the exact wrong strategy in the other.</p>
-    <p>OptEx separates the problem into two engines that run on different clocks. A <strong>long-term engine</strong> decides which regime we are in and whether to hold a core long position at all. A <strong>short-term engine</strong> trades the swings inside that regime, over horizons of a few days to a few weeks. The two are combined into a single net exposure, which is what actually gets traded.</p>
-
-    <div class="pillars">
-      <div class="pillar">
-        <span class="num">ENGINE 01</span>
-        <h3>Regime identification</h3>
-        <p>A weight-of-evidence framework that reads market breadth, volatility conditions, sentiment extremes and price behaviour. No single indicator decides anything — the model looks for clusters of independent evidence pointing the same way.</p>
-      </div>
-      <div class="pillar">
-        <span class="num">ENGINE 02</span>
-        <h3>Short-term edges</h3>
-        <p>A library of distinct signals, each with a long history of firing near turning points, and each operating on its own horizon — from a single session out to several weeks.</p>
-      </div>
-      <div class="pillar">
-        <span class="num">METHOD</span>
-        <h3>Confluence sizing</h3>
-        <p>Position size is a function of how many independent signals agree at once. One signal is noise. Several aligning across different timeframes is the setup we size into.</p>
-      </div>
-      <div class="pillar">
-        <span class="num">CONTROL</span>
-        <h3>Regime-scaled risk</h3>
-        <p>The evidence required to take a position rises with volatility. The same signal that justifies full size in a calm market earns a smaller position — or none — in a stressed one.</p>
-      </div>
-    </div>
-
-    <p style="margin-top:34px">The exit is deliberately asymmetric to the entry. Conviction is built patiently on the way in, as evidence accumulates. On the way out, any meaningful strength is taken as the cue to reduce — regardless of where the position sits on profit and loss. The model is harvesting a dislocation that decays; the first sign it is paying out is the signal to bank it, not to press.</p>
+<section class="wrap lp-sec">
+  <p class="kicker">The problem</p>
+  <h2>The market rewards discipline.<br>Most investors act on emotion.</h2>
+  <div class="lp-three">
+    <div><h3>Which stocks?</h3><p>There are thousands, and everyone has a tip. Most people end up buying companies they are familiar with, or whatever is in the news.</p></div>
+    <div><h3>When to buy and sell?</h3><p>Wait for a dip and it never comes. Buy near the top, sell in the panic. Timing is where most investors lose.</p></div>
+    <div><h3>What about the crashes?</h3><p>Everyone knows markets fall, and when they do it hurts. Most portfolios simply ride the drop all the way down. This one is built to profit on the way up, and on the way down.</p></div>
   </div>
 </section>
 
-<section class="reveal">
-  <div class="wrap">
-    <div class="sec-head"><div class="tick accum"></div><div>
-      <h2>Reading the regime</h2>
-      <div class="sub">Long-term engine — January 2024 to July 2026</div>
-    </div></div>
+<section class="wrap lp-sec">
+  <div class="sec-split">
+  <div>
+  <p class="kicker">The solution</p>
+  <h2>Three strategies.<br>One portfolio.</h2>
+  </div>
+  <p class="lede">Three distinct strategies, each with its own edge. One captures long-term trends, one profits from panic, and one decides how much risk to take. Together they deliver significantly higher returns, with less risk and fewer losses.</p>
+  </div>
+  <div class="lp-books" id="books"></div>
+  <p class="more"><a href="how-it-works.html">How each strategy works →</a></p>
+</section>
 
-    <p>The first job is classification. Green marks the phases the model identifies as accumulation and early-to-mid bull — conditions where buyers are absorbing supply and a core long position is justified. Amber marks mature bull and liquidation phases, where the model steps out of that core position.</p>
+<section class="wrap lp-sec" id="crash-test">
+  <div class="sec-split">
+  <div>
+  <p class="kicker">The crash test</p>
+  <h2>Markets are crashing.<br>Should you hold, sell or buy?</h2>
+  </div>
+  <p class="lede">When markets sell off and volatility spikes, it is stressful, and that is exactly when good decisions are hardest to make. The portfolio has no nerves to lose. It follows rules set in advance, whatever the headlines say. Here is how it handled every major S&amp;P 500 sell-off since 2008.</p>
+  </div>
+  <div class="crash" id="crash"></div>
+</section>
 
-    <figure>
-      <img src="charts/1_longterm_regime.png" alt="QQQ price coloured green during accumulation and early-mid bull phases and amber during mature bull and liquidation phases, with a long-term exposure panel below showing the core position switching on and off.">
-      <figcaption>QQQ coloured by identified regime. Diamonds mark regime changes; the panel below shows the resulting core long exposure. The model held its core position through most of the period and stood down twice.</figcaption>
-    </figure>
+<section class="wrap lp-sec">
+  <p class="kicker">Track record</p>
+  <h2 id="yrs-h">Not one losing year.</h2>
+  <div class="yrs" id="years"></div>
+</section>
 
-    <p>Two features matter here. The regime call is deliberately slow and it does not try to catch tops and bottoms — it is a statement about conditions, not a price forecast. And when the model steps down, it steps fully down: the core position is binary. Everything else that happens in an amber period is the short-term engine at work.</p>
+<section class="wrap lp-sec">
+  <p class="kicker">Day to day</p>
+  <h2>Clear to follow. Easy to live with.</h2>
+  <div class="lp-three">
+    <div><h3>One email, before the open</h3><p>Each morning you get the full portfolio: every holding, every change, and where the market exposure stands. Read it in two minutes.</p></div>
+    <div><h3>Works at any size</h3><p>Everything is shown as a percentage of the account, so it reads the same for a $10,000 account or a $10 million one.</p></div>
+    <div><h3>No screen-watching</h3><p>All changes happen at the open, so there is nothing to do during the day. Most days bring one or two trades, and about a third bring none.</p></div>
   </div>
 </section>
 
-<section class="reveal">
-  <div class="wrap">
-    <div class="sec-head"><div class="tick accum"></div><div>
-      <h2>Inside a bull market</h2>
-      <div class="sub">Short-term engine — April 2025 to April 2026</div>
-    </div></div>
-
-    <p>Within a constructive regime, the short-term engine has one job: buy weakness. Sell-offs in these conditions tend to be shallow, orderly and short-lived, because the underlying bid is intact. The model scales in as evidence of exhaustion accumulates, peaks its exposure near the low, then reduces into the first sign of strength and waits for the next opportunity.</p>
-
-    <figure>
-      <img src="charts/2_shortterm_bull.png" alt="QQQ through a bull regime with long-term exposure held at full weight, short-term exposure spiking on pullbacks, and combined exposure geared between one hundred and one hundred and fifty percent.">
-      <figcaption>The core long is held at full weight throughout. The short-term engine adds on pullbacks and comes off into strength, taking combined exposure above 100% at the points of maximum evidence.</figcaption>
-    </figure>
-
-    <p>The short-term panel shows the rhythm clearly: long stretches at a low base weight punctuated by sharp increases where several signals fired together. Those spikes are the confluence events — the days the model judged that forced selling had run its course.</p>
+<section class="wrap lp-sec">
+  <p class="kicker">Transparency</p>
+  <h2>Every decision, on the record.</h2>
+  <div class="lp-three">
+    <div><h3>Called in advance</h3><p>Each day's portfolio is published before the US market opens, so every decision is made in public, never after the fact.</p></div>
+    <div><h3>A permanent record</h3><p>Every day stays in the <a href="archive.html">archive</a>, and every file is timestamped in a <a href="https://github.com/optexsignals/optex">public Git repository</a>. Nothing can be quietly changed later.</p></div>
+    <div><h3>Rules, not opinions</h3><p>Every decision comes from the same fixed rules, applied the same way every day. No forecasts, no gut feel, no exceptions.</p></div>
   </div>
 </section>
 
-<section class="reveal">
-  <div class="wrap">
-    <div class="sec-head"><div class="tick liq"></div><div>
-      <h2>Inside a liquidation</h2>
-      <div class="sub">Short-term engine — November 2024 to April 2025</div>
-    </div></div>
-
-    <p>A stressed regime demands a different playbook, and this is where the two engines separate most visibly. The core long is off. Dips can extend rather than reverse, so the evidence bar for buying rises and position sizes come down. Crucially, the model can also position <strong>short</strong> — rallies that show no genuine buying pressure become opportunities rather than something to wait out.</p>
-
-    <figure>
-      <img src="charts/3_shortterm_liquidation.png" alt="QQQ through a liquidation regime with long-term exposure at zero and short-term and combined exposure swinging between positive and negative as the model trades both sides.">
-      <figcaption>Core exposure at zero throughout the amber period, while the short-term engine trades both directions — combined exposure swinging above and below the line as conditions shift.</figcaption>
-    </figure>
-
-    <p>This is the structural reason a regime framework matters. In high-volatility conditions moves become violent in <em>both</em> directions, not just downward — which makes a sharp, unsupported rally as tradeable as a capitulation low. The model does not need the market to go up to make money; it needs to know which regime it is in.</p>
+<section class="wrap lp-sec">
+  <p class="kicker">FAQ</p>
+  <h2>Common questions</h2>
+  <div class="faq-grid">
+  <div class="faq">
+    <details><summary>Can it lose money?</summary><p>Yes. In the 2011 debt scare it fell 13%, and its worst fall since 2000 was 15%. Future falls can be deeper.</p></details>
+    <details><summary>What does it cost?</summary><p>The daily email is free.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It is the published output of a model, the same for everyone. It does not know your circumstances, and what you do with it is up to you.</p></details>
+    <details><summary>Do I need to trade futures?</summary><p>Compass, the market-timing strategy, uses Nasdaq-100 index futures. Core and Contrarian trade ordinary shares. Without the futures you would hold the stocks with their full market risk, which is not the same portfolio.</p></details>
+  </div>
+  <form class="contact" id="contact" name="contact" method="POST" data-netlify="true" netlify-honeypot="company" action="message-sent.html">
+    <input type="hidden" name="form-name" value="contact">
+    <p hidden><label>Company <input name="company"></label></p>
+    <h3>Want to discuss further?</h3>
+    <label>Name<input name="name" autocomplete="name" required></label>
+    <label>Email<input type="email" name="email" autocomplete="email" required></label>
+    <label>Question<textarea name="message" rows="5" required></textarea></label>
+    <button type="submit">Send</button>
+  </form>
   </div>
 </section>
 
-<section class="reveal">
-  <div class="wrap">
-    <div class="sec-head"><div class="tick data"></div><div>
-      <h2>The result</h2>
-      <div class="sub">Model versus QQQ — January 2024 to July 2026</div>
-    </div></div>
-
-    <p>Combining the two engines produces a return profile that participates in bull markets while materially reducing the damage taken in liquidations — the periods where a long-only holder gives back the most.</p>
-
-    <figure>
-      <img src="charts/4_equity_vs_qqq.png" alt="Log-scale chart comparing the OptEx model equity curve with QQQ, both rebased to 100 from January 2024, with the model finishing substantially ahead.">
-      <figcaption>Both series rebased to 100 and shown on a log scale, so proportional moves are comparable throughout the period.</figcaption>
-    </figure>
-
-    <div class="stats">
-      <div class="stat"><div class="k">Sharpe ratio</div><div class="v">1.93</div><div class="c">QQQ: 1.16</div></div>
-      <div class="stat"><div class="k">Annualised return</div><div class="v">51.9%</div><div class="c">QQQ: 24.8%</div></div>
-      <div class="stat"><div class="k">Max drawdown</div><div class="v">−14.5%</div><div class="c">Peak to trough</div></div>
-      <div class="stat"><div class="k">Annualised vol</div><div class="v">23.0%</div><div class="c">Daily returns</div></div>
-    </div>
-
-    <p class="note">Figures cover January 2024 to July 2026 and are calculated on daily returns with a zero risk-free rate. Returns are exposure-scaled, with combined exposure ranging from −100% to +150%; headline return and volatility reflect that gearing.</p>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <p><strong>Important.</strong> This page describes a systematic trading model and is provided for information only. It is not investment advice, nor an offer or solicitation to buy or sell any security. Performance shown is derived from model results over the stated period and is not a guarantee of future returns. Trading involves risk of loss, and leveraged exposure increases that risk.</p>
-  </div>
-</footer>
-
-<script>
-(function(){
-  if(!window.matchMedia||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in')});return;
-  }
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
-  },{rootMargin:'0px 0px -12% 0px'});
-  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
-})();
-</script>
+<section class="lp-end"><div class="wrap">
+  <h2>Get each day's portfolio before the open.</h2>
+  <form class="signup" name="daily" method="POST" data-netlify="true" netlify-honeypot="company" action="thanks.html">
+      <input type="hidden" name="form-name" value="daily">
+      <p hidden><label>Company <input name="company"></label></p>
+      <input type="email" name="email" required placeholder="Your email address" aria-label="Email address" autocomplete="email">
+      <button type="submit">Get it free</button>
+    </form>
+    <p class="fine">One email a day, before the open. Free. Unsubscribe any time.</p>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><span class="mark">OPTEX</span><p>optexmodel.com · <a href="archive.html">Every day, archived</a> · <a href="index.html#contact">Contact</a> · <a href="feed.xml">RSS</a></p></div>
+  <p>For information only. Not investment advice, and not an offer to buy or sell any security or fund. Performance shown is model performance, not the results of actual trading. Past performance is not a guide to the future. Trading involves risk of loss, and futures leverage increases it.</p>
+</div></footer>
+<script src="assets/app.js?v=1793575607"></script>
+<script>renderLanding();</script>
 </body>
 </html>
