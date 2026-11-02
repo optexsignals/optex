@@ -11,10 +11,20 @@ HEAD = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{desc}">
+<link rel="canonical" href="{url}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OPTEX">
+<meta property="og:url" content="{url}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<meta property="og:image" content="https://optexmodel.com/og.png">
+<meta property="og:image" content="https://optexmodel.com/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="OPTEX: know what to buy, when to buy, and when to protect.">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{title}">
+<meta name="twitter:description" content="{desc}">
+<meta name="twitter:image" content="https://optexmodel.com/share.png">
 <meta name="theme-color" content="#ffffff">
 <link rel="alternate" type="application/rss+xml" title="OPTEX" href="feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,9 +51,9 @@ FOOT = """<footer><div class="wrap">
 
 def page(fn, title, desc, which, body):
     a = {f"a{i}": (' aria-current="page"' if i == which else "") for i in range(5)}
-    # version stamp from the asset files, so a normal refresh picks up any change
+    # version stamp from the asset files, so a normal refresh picks up any change; share card = static share.png (og.png is the daily chart for posts)
     v = int(max((HERE / "assets" / f).stat().st_mtime for f in ("style.css", "app.js")))
-    (HERE / fn).write_text(HEAD.format(title=title, desc=desc, v=v, **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
+    (HERE / fn).write_text(HEAD.format(title=title, desc=desc, v=v, url="https://optexmodel.com/" + ("" if fn == "index.html" else fn), **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
 
 
 
