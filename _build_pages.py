@@ -57,37 +57,6 @@ def page(fn, title, desc, which, body):
 
 
 
-PORTFOLIO = """<main class="wrap" id="app"><p class="loading">Loading the portfolio…</p></main>
-""" + FOOT + """<script>
-(async () => {
-  const app = document.getElementById("app");
-  try { renderPortfolio(await loadJSON("data/latest.json"), app); }
-  catch (e) { app.innerHTML = '<p class="loading">Could not load the portfolio</p>'; }
-})();
-</script>
-"""
-
-ARCHIVE = """<main class="wrap" id="app"><p class="loading">Loading…</p></main>
-""" + FOOT + """<script>
-(async () => {
-  const app = document.getElementById("app"), d = new URLSearchParams(location.search).get("d");
-  try {
-    if (d && /^\\d{4}-\\d{2}-\\d{2}$/.test(d)) return renderPortfolio(await loadJSON(`data/archive/${d}.json`), app, { archived: true });
-    const idx = (await loadJSON("data/archive/index.json")).slice().reverse();
-    app.innerHTML = `<div class="hero" style="grid-template-columns:1fr"><div><p class="kicker">Archive</p><h1 class="h2" style="font-size:clamp(48px,8vw,96px)">Every day,<br>as published</h1></div>
-      <p class="say">Each day's portfolio is written once, before the open, and never edited. The files also live in a public Git repository, so anyone can check the timestamps.</p></div>
-      <p class="alloc-cap">Strategy columns show the allocation at the open, as a % of the account. The last two columns show the previous session's return.</p>
-      <div class="scroll"><table><tr><th class="l">Portfolio for the open of</th><th><i class="chip wave"></i>Core</th><th><i class="chip opp"></i>Contrarian</th><th><i class="chip fut"></i>Compass</th><th>Net</th><th>Previous session</th><th>S&amp;P 500</th></tr>
-      ${idx.map((r) => `<tr><td class="l"><a href="archive.html?d=${r.asof}">${day(r.next_session || r.asof, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</a>${r.reconstructed ? " *" : ""}</td>
-        <td>${pct(r.lv_next, 0, false)}</td><td>${pct(r.har_next, 0, false)}</td><td>${pct(r.nq_next)}</td>
-        <td class="${tone(r.net_next ?? r.net_target_next)}"><b>${pct(r.net_next ?? r.net_target_next)}</b></td>
-        <td class="${tone(r.day)}">${pct(r.day, 2)}</td><td>${pct(r.spx_day, 2)}</td></tr>`).join("")}</table></div>
-      ${idx.some((r) => r.reconstructed) ? '<p class="note">* Rebuilt after the fact with the same rules, for days before the site went live. Not published at the time.</p>' : ""}`;
-  } catch (e) { app.innerHTML = '<p class="loading">Could not load the archive</p>'; }
-})();
-</script>
-"""
-
 # sign-up posts straight to Buttondown (double opt-in); Buttondown then redirects to thanks.html (set in its Subscribing settings)
 SIGNUP = """<form class="signup" method="post" action="https://buttondown.com/api/emails/embed-subscribe/optex">
       <input type="hidden" name="embed" value="1">
@@ -113,6 +82,37 @@ CLOSER = """<div class="lp">
   """ + SIGNUP + """
 </div></section>
 </div>
+"""
+
+PORTFOLIO = """<main class="wrap" id="app"><p class="loading">Loading the portfolio…</p></main>
+""" + CLOSER + FOOT + """<script>
+(async () => {
+  const app = document.getElementById("app");
+  try { renderPortfolio(await loadJSON("data/latest.json"), app); }
+  catch (e) { app.innerHTML = '<p class="loading">Could not load the portfolio</p>'; }
+})();
+</script>
+"""
+
+ARCHIVE = """<main class="wrap" id="app"><p class="loading">Loading…</p></main>
+""" + CLOSER + FOOT + """<script>
+(async () => {
+  const app = document.getElementById("app"), d = new URLSearchParams(location.search).get("d");
+  try {
+    if (d && /^\\d{4}-\\d{2}-\\d{2}$/.test(d)) return renderPortfolio(await loadJSON(`data/archive/${d}.json`), app, { archived: true });
+    const idx = (await loadJSON("data/archive/index.json")).slice().reverse();
+    app.innerHTML = `<div class="hero" style="grid-template-columns:1fr"><div><p class="kicker">Archive</p><h1 class="h2" style="font-size:clamp(48px,8vw,96px)">Every day,<br>as published</h1></div>
+      <p class="say">Each day's portfolio is written once, before the open, and never edited. The files also live in a public Git repository, so anyone can check the timestamps.</p></div>
+      <p class="alloc-cap">Strategy columns show the allocation at the open, as a % of the account. The last two columns show the previous session's return.</p>
+      <div class="scroll"><table><tr><th class="l">Portfolio for the open of</th><th><i class="chip wave"></i>Core</th><th><i class="chip opp"></i>Contrarian</th><th><i class="chip fut"></i>Compass</th><th>Net</th><th>Previous session</th><th>S&amp;P 500</th></tr>
+      ${idx.map((r) => `<tr><td class="l"><a href="archive.html?d=${r.asof}">${day(r.next_session || r.asof, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</a>${r.reconstructed ? " *" : ""}</td>
+        <td>${pct(r.lv_next, 0, false)}</td><td>${pct(r.har_next, 0, false)}</td><td>${pct(r.nq_next)}</td>
+        <td class="${tone(r.net_next ?? r.net_target_next)}"><b>${pct(r.net_next ?? r.net_target_next)}</b></td>
+        <td class="${tone(r.day)}">${pct(r.day, 2)}</td><td>${pct(r.spx_day, 2)}</td></tr>`).join("")}</table></div>
+      ${idx.some((r) => r.reconstructed) ? '<p class="note">* Rebuilt after the fact with the same rules, for days before the site went live. Not published at the time.</p>' : ""}`;
+  } catch (e) { app.innerHTML = '<p class="loading">Could not load the archive</p>'; }
+})();
+</script>
 """
 
 PERFORMANCE = """<main class="wrap" id="app"><p class="loading">Loading the track record…</p></main>
@@ -264,7 +264,7 @@ SENT = """<main class="wrap lp-thanks">
   <h1>Thank you.</h1>
   <p class="lede">We have your message and will reply promptly. Meanwhile, here is <a href="portfolio.html">today's portfolio</a>.</p>
 </main>
-""" + FOOT + """
+""" + CLOSER + FOOT + """
 """
 
 THANKS = """<main class="wrap lp-thanks">
