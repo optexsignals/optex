@@ -260,7 +260,7 @@ SENT = """<main class="wrap lp-thanks">
 THANKS = """<main class="wrap lp-thanks">
   <p class="kicker">Almost there</p>
   <h1>Check your inbox.</h1>
-  <p class="lede">We've sent you an email to confirm your address. Click the link in it and you're on the list: the welcome email follows, and the daily portfolio starts before the next open. Meanwhile, here is <a href="portfolio.html">today's portfolio</a>.</p>
+  <p class="lede">We've sent you an email to confirm your address. Click the link in it and you're on the list, and the daily portfolio starts before the next open. If it hasn't arrived in a few minutes, check your spam or promotions folder. Meanwhile, here is <a href="portfolio.html">today's portfolio</a>.</p>
 </main>
 """ + FOOT + """
 """
