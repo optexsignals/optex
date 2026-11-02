@@ -285,14 +285,14 @@ HOW = """<main class="wrap">
 """ + CLOSER + FOOT + """<script>renderExamples(document.getElementById("examples")); renderHeroArt(document.getElementById("hero-art"));</script>
 """
 
-page("index.html", "OPTEX — the all-weather stock portfolio",
+page("index.html", "OPTEX | All-Weather Stock Portfolio",
      "Know what to buy, when to buy, and when to protect: a rules-based stock portfolio, published free every day before the open.", 4, LANDING)
-page("portfolio.html", "OPTEX — today's portfolio",
+page("portfolio.html", "Today's Portfolio | OPTEX",
      "What the OPTEX all-weather stock portfolio holds at the next open: Core, Contrarian and Compass.", 0, PORTFOLIO)
-page("message-sent.html", "OPTEX — message sent", "Thanks for getting in touch.", -1, SENT)
-page("thanks.html", "OPTEX — you're on the list", "Thanks for signing up to the OPTEX daily email.", -1, THANKS)
-page("archive.html", "OPTEX — archive", "Every day of the OPTEX all-weather stock portfolio, exactly as published before the open.", 3, ARCHIVE)
-page("performance.html", "OPTEX — performance", "The track record of the OPTEX all-weather stock portfolio against the S&amp;P 500 and Nasdaq-100.", 1, PERFORMANCE)
-page("how-it-works.html", "OPTEX — how it works",
+page("message-sent.html", "Message Sent | OPTEX", "Thanks for getting in touch.", -1, SENT)
+page("thanks.html", "You're on the List | OPTEX", "Thanks for signing up to the OPTEX daily email.", -1, THANKS)
+page("archive.html", "Archive | OPTEX", "Every day of the OPTEX all-weather stock portfolio, exactly as published before the open.", 3, ARCHIVE)
+page("performance.html", "Performance | OPTEX", "The track record of the OPTEX all-weather stock portfolio against the S&amp;P 500 and Nasdaq-100.", 1, PERFORMANCE)
+page("how-it-works.html", "How It Works | OPTEX",
      "How the OPTEX all-weather stock portfolio works: Core, Contrarian and Compass.", 2, HOW)
 print("pages written")
