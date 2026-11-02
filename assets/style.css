@@ -477,3 +477,12 @@ table.quant.risk-t td:not(.l) { width: 21%; } table.quant.risk-t td.l { width: 1
   .scroll table td.l, .scroll table th.l { position: sticky; left: 0; background: var(--paper); z-index: 1; box-shadow: 1px 0 0 var(--rule); }
 }
 
+/* welcome page (after confirming the email address) */
+.welcome { max-width: 760px; }
+.welcome h2 { font: 400 26px/1.2 var(--serif); margin: 40px 0 12px; }
+.welcome p, .welcome li { font-size: 16px; line-height: 1.65; color: var(--ink-2); }
+.welcome ul { padding-left: 20px; margin: 0 0 12px; }
+.welcome li { margin-bottom: 8px; }
+.welcome li b { color: var(--ink); }
+.welcome .c-core { color: var(--wave); } .welcome .c-contra { color: var(--opp); } .welcome .c-compass { color: var(--kairos); }
+

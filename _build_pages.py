@@ -78,9 +78,9 @@ ARCHIVE = """<main class="wrap" id="app"><p class="loading">Loading…</p></main
 </script>
 """
 
-SIGNUP = """<form class="signup" name="daily" method="POST" data-netlify="true" netlify-honeypot="company" action="thanks.html">
-      <input type="hidden" name="form-name" value="daily">
-      <p hidden><label>Company <input name="company"></label></p>
+# sign-up goes straight to Buttondown (double opt-in + welcome email); app.js posts it in the background and shows thanks.html
+SIGNUP = """<form class="signup" method="post" action="https://buttondown.com/api/emails/embed-subscribe/optex">
+      <input type="hidden" name="embed" value="1">
       <input type="email" name="email" required placeholder="Your email address" aria-label="Email address" autocomplete="email">
       <button type="submit">Get it free</button>
     </form>
@@ -205,6 +205,49 @@ LANDING = """<main class="lp">
 """ + FOOT + """<script>renderLanding();</script>
 """
 
+# shown after a subscriber clicks Buttondown's confirmation link (Buttondown "after confirming" redirect)
+WELCOME = """<main class="wrap lp-thanks welcome">
+  <p class="kicker">You're on the list</p>
+  <h1>Welcome to OPTEX.</h1>
+  <p class="lede">Thanks for following along. You'll now get the OPTEX all-weather stock portfolio direct to your inbox daily.</p>
+
+  <h2>What you'll receive</h2>
+  <p>One email each trading day, with the portfolio for that day's open:</p>
+  <ul>
+    <li><b>Allocation:</b> how much of the portfolio is in each of the three strategies, and the net exposure to the market.</li>
+    <li><b>Changes at the open:</b> the stocks to sell and buy, and any change to the futures position.</li>
+    <li><b>Every position:</b> each stock and its size, as a percentage of the account.</li>
+    <li><b>Performance:</b> the portfolio against the S&amp;P 500 for the day, the month and the year to date.</li>
+  </ul>
+
+  <h2>When it arrives</h2>
+  <p>The models run after the US market closes at 4pm New York time. The email goes out in the early hours, New York time, usually by about 1am ET (6am in London), many hours before the 9:30am ET open.</p>
+  <p>Friday's email arrives early on Saturday morning and covers Monday's open. There is no email when the US market is closed.</p>
+
+  <h2>How the portfolio works</h2>
+  <p>Three strategies, each with its own edge, run as one portfolio:</p>
+  <ul>
+    <li><b class="c-core">Core</b> owns strong, leading stocks that have settled into a calm, steady advance, and holds them until volatility returns. Each position is 1.5% of the portfolio, with up to 50 holdings across sectors.</li>
+    <li><b class="c-contra">Contrarian</b> buys great companies when panic selling drives them far below fair value, and sells as soon as they snap back, usually within days. Each purchase is 3.3% of the portfolio, up to 10% in any one stock. Most of the time it waits in cash.</li>
+    <li><b class="c-compass">Compass</b> reads the whole market every day and uses Nasdaq-100 index futures to set the portfolio's net exposure: close to zero on most days, long or short when it has high conviction. Net exposure always stays between &minus;100% and +100%.</li>
+  </ul>
+  <p>Stocks are never bought on margin, and Contrarian has first call on cash: when it needs room, Core's oldest positions are sold, and bought back later if they still qualify.</p>
+
+  <h2>Following it</h2>
+  <ul>
+    <li><b>Sizes are percentages of the account,</b> so they work at any size. With a $100,000 account, a 1.5% position is $1,500.</li>
+    <li><b>Every trade happens at the open.</b> Nothing changes during the day, and there are no stop-losses: each position is closed by its strategy's own rules.</li>
+    <li><b>Compass uses Nasdaq-100 futures.</b> Without them, you would hold the stocks with their full market risk, which is not the same portfolio. Futures contracts come in fixed sizes, so smaller accounts can only match the futures position approximately.</li>
+  </ul>
+
+  <h2>Nothing hidden</h2>
+  <p>Today's portfolio, the full track record and every past day, exactly as published, are on this site. Each day is also timestamped in a <a href="@REPO@">public record</a> that cannot be changed later.</p>
+  <p class="more" style="margin-top:28px"><a href="portfolio.html">See today's portfolio &rarr;</a></p>
+  <p>Questions? <a href="index.html#contact">Get in touch</a>.</p>
+</main>
+""" + FOOT + """
+"""
+
 SENT = """<main class="wrap lp-thanks">
   <p class="kicker">Message sent</p>
   <h1>Thank you.</h1>
@@ -214,9 +257,9 @@ SENT = """<main class="wrap lp-thanks">
 """
 
 THANKS = """<main class="wrap lp-thanks">
-  <p class="kicker">You're on the list</p>
-  <h1>Thank you.</h1>
-  <p class="lede">The first email arrives before the next US market open. Meanwhile, here is <a href="portfolio.html">today's portfolio</a>.</p>
+  <p class="kicker">Almost there</p>
+  <h1>Check your inbox.</h1>
+  <p class="lede">We've sent you an email to confirm your address. Click the link in it and you're on the list: the welcome email follows, and the daily portfolio starts before the next open. Meanwhile, here is <a href="portfolio.html">today's portfolio</a>.</p>
 </main>
 """ + FOOT + """
 """
@@ -292,6 +335,7 @@ page("index.html", "OPTEX | All-Weather Stock Portfolio",
 page("portfolio.html", "Today's Portfolio | OPTEX",
      "What the OPTEX all-weather stock portfolio holds at the next open: Core, Contrarian and Compass.", 0, PORTFOLIO)
 page("message-sent.html", "Message Sent | OPTEX", "Thanks for getting in touch.", -1, SENT)
+page("welcome.html", "Welcome | OPTEX", "Welcome to the OPTEX daily email: what you will receive, when it arrives and how the portfolio works.", -1, WELCOME)
 page("thanks.html", "You're on the List | OPTEX", "Thanks for signing up to the OPTEX daily email.", -1, THANKS)
 page("archive.html", "Archive | OPTEX", "Every day of the OPTEX all-weather stock portfolio, exactly as published before the open.", 3, ARCHIVE)
 page("performance.html", "Performance | OPTEX", "The track record of the OPTEX all-weather stock portfolio against the S&amp;P 500 and Nasdaq-100.", 1, PERFORMANCE)
