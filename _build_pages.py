@@ -223,6 +223,7 @@ WELCOME = """<main class="wrap lp-thanks welcome">
   <h2>When it arrives</h2>
   <p>The models run after the US market closes at 4pm New York time. The email goes out in the early hours, New York time, usually by about 1am ET (6am in London), many hours before the 9:30am ET open.</p>
   <p>Friday's email arrives early on Saturday morning and covers Monday's open. There is no email when the US market is closed.</p>
+  <p><b>Using Gmail?</b> The first email may land in the Promotions tab. Drag it to Primary and choose &ldquo;Yes&rdquo; when Gmail asks, and every email after that arrives in your main inbox.</p>
 
   <h2>How the portfolio works</h2>
   <p>Three strategies, each with its own edge, run as one portfolio:</p>
