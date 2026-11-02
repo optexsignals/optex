@@ -580,11 +580,9 @@ async function renderHeroArt(host) {
   m.querySelectorAll(".nav a").forEach((a) => a.addEventListener("click", () => m.classList.remove("open")));
 })();
 
-/* ---------- email sign-up: post to Buttondown in the background, then show our own thank-you page ---------- */
-document.querySelectorAll("form.signup").forEach((f) => f.addEventListener("submit", async (ev) => {
-  ev.preventDefault();
+/* ---------- email sign-up: a normal form post to Buttondown (its documented embed), which then redirects to thanks.html.
+   (A background fetch never reached Buttondown, so the browser submits the form itself.) ---------- */
+document.querySelectorAll("form.signup").forEach((f) => f.addEventListener("submit", () => {
   const b = f.querySelector("button"); b.disabled = true; b.textContent = "Signing up…";
-  try { await fetch(f.action, { method: "POST", mode: "no-cors", body: new FormData(f) }); location.href = "thanks.html"; }
-  catch (e) { f.submit(); }                       // network trouble: fall back to Buttondown's own page
 }));
 

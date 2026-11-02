@@ -78,7 +78,7 @@ ARCHIVE = """<main class="wrap" id="app"><p class="loading">Loading…</p></main
 </script>
 """
 
-# sign-up goes straight to Buttondown (double opt-in + welcome email); app.js posts it in the background and shows thanks.html
+# sign-up posts straight to Buttondown (double opt-in); Buttondown then redirects to thanks.html (set in its Subscribing settings)
 SIGNUP = """<form class="signup" method="post" action="https://buttondown.com/api/emails/embed-subscribe/optex">
       <input type="hidden" name="embed" value="1">
       <input type="email" name="email" required placeholder="Your email address" aria-label="Email address" autocomplete="email">
