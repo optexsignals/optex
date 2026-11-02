@@ -528,7 +528,7 @@ async function renderExamples(root) {
     timeChart(document.getElementById(`ex-chart-${j}`), e.dates, [
       { h: 330, zero: true, fmt: (v) => v.toFixed(0).replace("-", "−") + "%", series: [
         { name: "S&P 500", endLabel: "S&P 500", v: e.L.spx, color: css("--ink-3"), w: 2, tipFmt: f },
-        ...B.map(([k, n, col]) => ({ name: n, endLabel: n, v: e.L[k], color: css(col), w: k === e.lead ? 2.6 : 1.6, tipFmt: f })),
+        ...B.map(([k, n, col]) => ({ name: n, endLabel: n, v: e.L[k], color: css(col), w: 2, tipFmt: f })),
         { name: "Portfolio", endLabel: "Portfolio", v: e.L.model, color: css("--ink"), w: 3, tipFmt: f }] },
     ], { padRight: 110, dayTicks: e.dates.length < 80, label: `${e.name}: portfolio, S&P 500 and each strategy's share of the return` }); });
 }
