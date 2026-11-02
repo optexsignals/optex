@@ -262,7 +262,10 @@ function changes(n, book) {
 /* ---------- time chart (shared crosshair across panels) ---------- */
 function timeChart(host, dates, panels, opts = {}) {
   host.innerHTML = "";
-  const W = 1000, x0 = 40, x1 = 996 - (opts.padRight || 0), gap = 18;
+  // phones: draw 1:1 at the real width (readable text, visible lines) and a bit shallower; desktop: 1000-wide drawing
+  const cw = host.clientWidth, phone = cw > 0 && cw < 600;
+  if (phone) panels.forEach((p) => (p.h = Math.round(p.h * 0.7)));
+  const W = phone ? cw : 1000, x0 = phone ? 36 : 40, x1 = W - 4 - (opts.padRight || 0) * (phone ? 0.7 : 1), gap = 18;
   // opts.axisAfter: put the date axis under that panel (e.g. 0 = under the price chart) with room before the next one
   const ax = opts.axisAfter, gp = panels.map((_, i) => (i === ax ? 50 : gap)), th = panels.map((p) => (p.title ? 24 : 0));
   const H = panels.reduce((a, p, i) => a + p.h + th[i], 0) + gp.slice(0, -1).reduce((a, g) => a + g, 0) + (ax != null && ax < panels.length - 1 ? 6 : 22);
@@ -420,12 +423,12 @@ async function landing() {
   const k = D.dates.findIndex((d) => d >= "2018-01-01");
   const grow = (r) => { let g = 100; return r.slice(k).map((x, i) => (i ? (g *= 1 + x / 100) : g)); };
   const heroChart = () => timeChart(document.getElementById("hero-chart"), D.dates.slice(k), [
-    { h: innerWidth < 600 ? 680 : 370, log: true, fmt: (v) => Math.round(10 ** v).toLocaleString(), series: [
+    { h: 370, log: true, fmt: (v) => Math.round(10 ** v).toLocaleString(), series: [
       { name: "S&P 500", v: grow(D.spx), color: css("--ink-3"), w: 1.6, tipFmt: (v) => pct(v - 100, 0) },
       { name: "OPTEX all-weather stock portfolio", v: grow(D.model), color: css("--wave"), w: 2.6, wash: 0.1, tipFmt: (v) => pct(v - 100, 0) }] },
   ], { yearTicks: true, yearEvery: 1, label: "Portfolio vs S&P 500 since 2018" });
   heroChart();
-  let narrow = innerWidth < 600;                     // phone and desktop use different chart depths: redraw when crossing
+  let narrow = innerWidth < 600;                     // phone and desktop draw differently: redraw when crossing
   addEventListener("resize", () => { if ((innerWidth < 600) !== narrow) { narrow = innerWidth < 600; heroChart(); } });
 }
 
@@ -523,7 +526,7 @@ async function renderExamples(root) {
   const f = (v) => pct(v, 1);
   E.forEach((e, j) => { const [, ln, lc] = B.find(([k]) => k === e.lead);
     timeChart(document.getElementById(`ex-chart-${j}`), e.dates, [
-      { h: innerWidth < 600 ? 520 : 330, zero: true, fmt: (v) => v.toFixed(0).replace("-", "−") + "%", series: [
+      { h: 330, zero: true, fmt: (v) => v.toFixed(0).replace("-", "−") + "%", series: [
         { name: "S&P 500", endLabel: "S&P 500", v: e.L.spx, color: css("--ink-3"), w: 2, tipFmt: f },
         ...B.map(([k, n, col]) => ({ name: n, endLabel: n, v: e.L[k], color: css(col), w: k === e.lead ? 2.6 : 1.6, tipFmt: f })),
         { name: "Portfolio", endLabel: "Portfolio", v: e.L.model, color: css("--ink"), w: 3, tipFmt: f }] },
@@ -569,3 +572,10 @@ async function renderHeroArt(host) {
     fill: "none", stroke: css(col), "stroke-width": k === "model" ? 8 : 3, opacity: op, "stroke-linecap": "round", "stroke-linejoin": "round" })));
   host.appendChild(s);
 }
+
+/* ---------- header: menu button on phones ---------- */
+(() => {
+  const m = document.querySelector(".mast"), b = m && m.querySelector(".menu-btn"); if (!b) return;
+  b.addEventListener("click", () => { const o = m.classList.toggle("open"); b.setAttribute("aria-expanded", o); });
+  m.querySelectorAll(".nav a").forEach((a) => a.addEventListener("click", () => m.classList.remove("open")));
+})();

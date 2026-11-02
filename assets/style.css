@@ -447,3 +447,33 @@ table.quant.risk-t td:not(.l) { width: 21%; } table.quant.risk-t td.l { width: 1
 
 /* homepage headline: one word per strategy (what = Core, when = Contrarian, protect = Compass) */
 .lp-hero-text h1 .c-core { color: var(--wave); } .lp-hero-text h1 .c-contra { color: var(--opp); } .lp-hero-text h1 .c-compass { color: var(--kairos); }
+
+/* ---------- phones (11-02) ---------- */
+.cta-m, .menu-btn { display: none; }
+@media (max-width: 760px) {
+  /* one-row header: wordmark, Today's portfolio, menu */
+  .mast .wrap { flex-wrap: nowrap; padding-top: 12px; padding-bottom: 12px; position: relative; }
+  .mark small { display: none; }
+  .mark { font-size: 22px; margin-right: auto; }
+  .cta-m { display: inline-block; font: 600 13px var(--text); color: var(--paper); background: var(--ink); padding: 8px 12px; border-radius: 4px; text-decoration: none; white-space: nowrap; }
+  .menu-btn { display: inline-flex; flex-direction: column; justify-content: center; gap: 4px; width: 40px; height: 36px; padding: 0 9px; background: none; border: 1px solid var(--rule-2); border-radius: 4px; cursor: pointer; }
+  .menu-btn span { display: block; height: 2px; background: var(--ink); border-radius: 1px; transition: transform .2s, opacity .2s; }
+  .mast.open .menu-btn span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .mast.open .menu-btn span:nth-child(2) { opacity: 0; }
+  .mast.open .menu-btn span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .mast .nav { display: none; }
+  .mast.open .nav { display: flex; flex-direction: column; gap: 0; position: absolute; left: 0; right: 0; top: 100%; background: var(--paper);
+    border-bottom: 1px solid var(--rule); box-shadow: 0 8px 18px rgba(0,0,0,.06); padding: 4px 16px 10px; }
+  .mast.open .nav a { padding: 13px 0; font-size: 16px; border-bottom: 1px solid var(--rule); }
+  .mast.open .nav a:last-child { border-bottom: 0; }
+  .mast.open .nav a[aria-current="page"] { color: var(--wave); border-bottom-color: var(--rule); }
+  .mast.open .nav .cta { display: none; }
+  /* range buttons: all on one row, equal widths */
+  .seg.ranges { display: flex; flex-wrap: nowrap; width: 100%; }
+  .seg.ranges button { flex: 1 1 0; padding: 8px 0; font-size: 12.5px; }
+  .seg.bench button { padding: 7px 10px; }
+  /* wide tables: the label column stays put while the numbers scroll */
+  .scroll { -webkit-overflow-scrolling: touch; }
+  .scroll table td.l, .scroll table th.l { position: sticky; left: 0; background: var(--paper); z-index: 1; box-shadow: 1px 0 0 var(--rule); }
+}
+

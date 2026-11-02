@@ -25,6 +25,8 @@ HEAD = """<!doctype html>
 <body>
 <header class="mast"><div class="wrap">
   <a class="mark" href="index.html">OPTEX<small>All-weather stock portfolio</small></a>
+  <a class="cta cta-m" href="portfolio.html">Today's portfolio</a>
+  <button class="menu-btn" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   <nav class="nav"><a href="index.html"{a4}>Home</a><a href="how-it-works.html"{a2}>How it works</a><a href="performance.html"{a1}>Performance</a><a href="archive.html"{a3}>Archive</a><a class="cta" href="portfolio.html"{a0}>Today's portfolio</a></nav>
 </div></header>
 """
