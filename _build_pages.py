@@ -206,7 +206,7 @@ LANDING = """<main class="lp">
 SENT = """<main class="wrap lp-thanks">
   <p class="kicker">Message sent</p>
   <h1>Thank you.</h1>
-  <p class="lede">We have your question and will reply by email. Meanwhile, here is <a href="portfolio.html">today's portfolio</a>.</p>
+  <p class="lede">We have your message and will reply promptly. Meanwhile, here is <a href="portfolio.html">today's portfolio</a>.</p>
 </main>
 """ + FOOT + """
 """
