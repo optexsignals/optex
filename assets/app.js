@@ -405,7 +405,7 @@ async function landing() {
 
   const card = (cls, name, q, txt) => `<div class="lp-book ${cls}"><p class="kicker">${q}</p><h3>${name}</h3><p>${txt}</p></div>`;
   document.getElementById("books").innerHTML =
-    card("wave", "Core", "The long-term engine", "Owns strong, high-quality companies in steady, consistent uptrends, the kind that consistently beat the market. Highly selective, yet diversified: up to 50 positions, spread across sectors. This is the strategy that captures big, powerful advances from the start, before you hear about them.") +
+    card("wave", "Core", "The long-term engine", "Owns strong, high-quality companies in steady uptrends, the kind that consistently beat the market. Highly selective, yet diversified: up to 50 positions, spread across sectors. This is the strategy that captures big, powerful advances from the start, before you hear about them.") +
     card("opp", "Contrarian", "The opportunist", "Buys high-quality stocks when other investors are panicking. Short-term trades in the world's top companies, held for days rather than months. This is how the portfolio turns investor emotion into extra return.") +
     card("fut", "Compass", "The risk manager", "Assesses the entire market every day and builds a directional view. Most days its job is to protect Core and Contrarian by hedging out their market risk, but when it has high conviction of a move in either direction, it takes the entire portfolio long or short. This is how the portfolio profits in all types of market: bull, bear and everything in between.");
 

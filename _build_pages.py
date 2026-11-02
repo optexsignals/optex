@@ -140,7 +140,7 @@ LANDING = """<main class="lp">
   <div class="lp-three">
     <div><h3>Which stocks?</h3><p>There are thousands, and everyone has a tip. Most people end up buying companies they are familiar with, or whatever is in the news.</p></div>
     <div><h3>When to buy and sell?</h3><p>Wait for a dip and it never comes. Buy near the top, sell in the panic. Timing is where most investors lose.</p></div>
-    <div><h3>What about the crashes?</h3><p>Everyone knows markets fall, and when they do it hurts. Most portfolios simply ride the drop all the way down. This one is built to profit on the way up, and on the way down.</p></div>
+    <div><h3>What about the crashes?</h3><p>Everyone knows markets fall, and when they do it hurts. Most portfolios simply ride the drop all the way down. In 2008 the S&amp;P 500 fell 37%. This portfolio made 89%.</p></div>
   </div>
 </section>
 
@@ -289,7 +289,7 @@ HOW = """<main class="wrap">
     <div><p class="kicker" style="color:var(--opp)"><i class="chip opp"></i> The opportunist</p><h3>Contrarian</h3>
       <p>When an earnings miss or a bad headline sets off a wave of fear, even great companies can be sold relentlessly, day after day, driving the price far below anything the news justifies. The Contrarian strategy looks for these moments of capitulation, when forced and emotional selling has run its course.</p>
       <p>It steps in gradually to manage risk. Each purchase is 3.3% of the portfolio, and if the selling continues it adds more, up to three purchases (10%) in any one stock. It sells as soon as the price snaps back, usually within days.</p>
-      <p>Most of the time it waits in cash. It is busiest in market panics, exactly when Core is cutting back.</p></div>
+      <p>Most of the time it waits in cash. It is busiest in market panics, when Core is cutting back.</p></div>
     <div><p class="kicker" style="color:var(--kairos)"><i class="chip fut"></i> The risk manager</p><h3>Compass</h3>
       <p>The Compass strategy assesses the entire market every day, reading breadth, volatility, sentiment and trend, and forms a directional view.</p>
       <p>Most days its job is to protect Core and Contrarian, using Nasdaq-100 index futures to hedge out their market risk so that returns come from stock selection alone. When it has high conviction of a move in either direction, it takes the entire portfolio long or short.</p>
@@ -332,7 +332,7 @@ HOW = """<main class="wrap">
   <div class="three four">
     <div><p class="kicker">Step 1</p><h3>The close</h3><p>After the US market closes, the models run on the day's final data. Each strategy reviews its positions and looks for entry and exit signals.</p></div>
     <div><p class="kicker">Step 2</p><h3>The portfolio</h3><p>Each strategy's trades are combined into one portfolio, in the fixed order: Contrarian first, then Core, then Compass sets the net exposure with futures. Every position and exposure limit is checked before anything is final.</p></div>
-    <div><p class="kicker">Step 3</p><h3>Before the open</h3><p>The portfolio for the next trading day, with every buy and sell to be made at the open, is published on this site and emailed to subscribers. Every day is kept in the <a href="archive.html">archive</a> and timestamped in a <a href="@REPO@">public Git repository</a>, an auditable record of every position that can never be quietly changed.</p></div>
+    <div><p class="kicker">Step 3</p><h3>Before the open</h3><p>The portfolio for the next trading day, with every buy and sell to be made at the open, is published on this site and emailed to subscribers. Every day is kept in the <a href="archive.html">archive</a> and timestamped in a <a href="@REPO@">public Git repository</a>, an auditable record of every position, so any later change would show.</p></div>
     <div><p class="kicker">Step 4</p><h3>The open</h3><p>All trades are made at the next morning's open. Nothing is changed during the day, and there are no stop-losses. Risk is controlled through diversification and the position limits within each strategy.</p></div>
   </div>
   </section>
