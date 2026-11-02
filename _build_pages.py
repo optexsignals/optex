@@ -212,7 +212,7 @@ WELCOME = """<main class="wrap lp-thanks welcome">
   <p class="lede">Thanks for following along. You'll now get the OPTEX all-weather stock portfolio direct to your inbox daily.</p>
 
   <h2>What you'll receive</h2>
-  <p>One email each trading day, with the portfolio for that day's open:</p>
+  <p>One email each weekday, with the portfolio for that day's open:</p>
   <ul>
     <li><b>Allocation:</b> how much of the portfolio is in each of the three strategies, and the net exposure to the market.</li>
     <li><b>Changes at the open:</b> the stocks to sell and buy, and any change to the futures position.</li>
