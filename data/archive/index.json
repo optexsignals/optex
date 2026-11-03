@@ -1602,5 +1602,19 @@
 "lv_next": 55.9,
 "har_next": 0.0,
 "nq_next": -55.9
+},
+{
+"asof": "2026-11-02",
+"next_session": "2026-11-03",
+"call": "big long",
+"optex": 120.0,
+"net_target_next": 120.0,
+"net_next": 100.0,
+"lv_next": 47.2,
+"har_next": 0.0,
+"nq_next": 52.8,
+"day": -0.88,
+"spx_day": -0.5,
+"n_orders": 2
 }
 ]
