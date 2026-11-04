@@ -42,21 +42,18 @@ HEAD = """<!doctype html>
 """
 
 FOOT = """<footer><div class="wrap">
-  <div><span class="mark">OPTEX</span><p>optexmodel.com · <a href="archive.html">Every day, archived</a> · <a href="index.html#contact">Contact</a> · <a href="pro/">For professionals</a> · <a href="feed.xml">RSS</a></p></div>
+  <div><span class="mark">OPTEX</span><p>optexmodel.com · <a href="archive.html">Every day, archived</a> · <a href="index.html#contact">Contact</a> · <a href="feed.xml">RSS</a></p></div>
   <p>For information only. Not investment advice, and not an offer to buy or sell any security or fund. Performance shown is model performance, not the results of actual trading. Past performance is not a guide to the future. Trading involves risk of loss, and futures leverage increases it.</p>
 </div></footer>
 <script src="assets/app.js?v={v}"></script>
 """
 
 
-def page(fn, title, desc, which, body, pro=False):
+def page(fn, title, desc, which, body):
     a = {f"a{i}": (' aria-current="page"' if i == which else "") for i in range(5)}
     # version stamp from the asset files, so a normal refresh picks up any change; share card = static share.png (og.png is the daily chart for posts)
     v = int(max((HERE / "assets" / f).stat().st_mtime for f in ("style.css", "app.js")))
-    url = "https://optexmodel.com/" + ("pro/" if pro else "") + ("" if fn == "index.html" else fn)
-    out = HERE / ("pro" if pro else "") / fn
-    out.parent.mkdir(exist_ok=True)
-    out.write_text((PRO_HEAD if pro else HEAD).format(title=title, desc=desc, v=v, url=url, **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
+    (HERE / fn).write_text(HEAD.format(title=title, desc=desc, v=v, url="https://optexmodel.com/" + ("" if fn == "index.html" else fn), **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
 
 
 
@@ -354,5 +351,4 @@ page("archive.html", "Archive | OPTEX", "Every day of the OPTEX all-weather stoc
 page("performance.html", "Performance | OPTEX", "The track record of the OPTEX all-weather stock portfolio against the S&amp;P 500 and Nasdaq-100.", 1, PERFORMANCE)
 page("how-it-works.html", "How It Works | OPTEX",
      "How the OPTEX all-weather stock portfolio works: Core, Contrarian and Compass.", 2, HOW)
-exec((HERE / "_pro_pages.py").read_text(encoding="utf-8"))   # /pro/: same layout, wording for traders and professionals
 print("pages written")
