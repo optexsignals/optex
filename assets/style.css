@@ -486,3 +486,15 @@ table.quant.risk-t td:not(.l) { width: 21%; } table.quant.risk-t td.l { width: 1
 .welcome li b { color: var(--ink); }
 .welcome .c-core { color: var(--wave); } .welcome .c-contra { color: var(--opp); } .welcome .c-compass { color: var(--kairos); }
 
+
+/* /pro/ pages */
+.lp-stats.lp-stats-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .lp-stats.lp-stats-4 { grid-template-columns: 1fr 1fr; } .lp-stats.lp-stats-4 > div:nth-child(3) { border-left: 0; padding-left: 16px; } }
+@media (max-width: 700px) { .lp-stats.lp-stats-4 { grid-template-columns: 1fr; } }
+table.quant .t { display: block; font-size: 12px; color: var(--ink-3); }
+table.quant tr.subh td { color: var(--ink-3); font-size: 13px; }
+table.quant td.base { background: var(--wave-tint); }
+table.quant.split-t, table.quant.fac-t { width: 100%; max-width: none; }
+table.quant.split-t td:not(.l) { width: 15%; }
+table.quant.fac-t td:not(.l) { width: 17%; }
+table.quant.cost-t td:not(.l) { width: 22%; }

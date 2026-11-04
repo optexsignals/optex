@@ -10,7 +10,9 @@ const pct = (x, dp = 0, sign = true) => {
 const tone = (x) => x == null ? "" : x > 0 ? "up" : x < 0 ? "down" : "";
 const svg = (tag, a = {}) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
 const day = (d, o = { weekday: "long", day: "numeric", month: "long" }) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
-async function loadJSON(u) { const r = await fetch(u, { cache: "no-cache" }); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }
+// pages under /pro/ set <html data-base="../"> so they read the same data files as the main site
+const BASE = document.documentElement.dataset.base || "", PRO = document.documentElement.dataset.site === "pro";
+async function loadJSON(u) { const r = await fetch(/^(https?:|\/)/.test(u) ? u : BASE + u, { cache: "no-cache" }); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }
 
 /* ---------- home: the portfolio after the next open ---------- */
 function renderPortfolio(s, root, { archived = false } = {}) {
@@ -228,7 +230,7 @@ function keyTable(d, cols) {
 
 function kairosChange(now, next) {
   const d = next - now;
-  let t = "No change";
+  let t = "None";
   if (Math.abs(d) >= 0.5) {
     if (Math.abs(next) < 0.5) t = `Close the ${now < 0 ? "short" : "long"} (now ${pct(now)})`;
     else if (Math.abs(now) < 0.5) t = `Open a ${next < 0 ? "short" : "long"} of ${pct(Math.abs(next), 0, false)}`;
@@ -397,6 +399,8 @@ async function landing() {
   const [h, D] = await Promise.all([loadJSON("data/history.json"), fullDaily()]);
   const years = calendarYears(D);
   const st = h.stats.full, lose = (k) => years.filter((y) => y[k] < 0).length;
+  if (PRO) proLanding(D, h, years);          // pro: its own stats and strategy cards, same chart, sell-offs and years
+  else {
   document.getElementById("stats").innerHTML = [
     [pct(st.r.cagr, 1, false), "annual return", `S&P 500 ${pct(st.spx.cagr, 1, false)}`],
     [pct(st.r.maxdd, 0), "worst fall, peak to trough", `S&P 500 ${pct(st.spx.maxdd, 0)}`],
@@ -408,6 +412,7 @@ async function landing() {
     card("wave", "Core", "The long-term engine", "Owns strong, high-quality companies in steady uptrends, the kind that consistently beat the market. Highly selective, yet diversified: up to 50 positions, spread across sectors. This is the strategy that captures big, powerful advances from the start, before you hear about them.") +
     card("opp", "Contrarian", "The opportunist", "Buys high-quality stocks when other investors are panicking. Short-term trades in the world's top companies, held for days rather than months. This is how the portfolio turns investor emotion into extra return.") +
     card("fut", "Compass", "The risk manager", "Assesses the entire market every day and builds a directional view. Most days its job is to protect Core and Contrarian by hedging out their market risk, but when it has high conviction of a move in either direction, it takes the entire portfolio long or short. This is how the portfolio profits in all types of market: bull, bear and everything in between.");
+  }
 
   document.getElementById("crash").innerHTML = `<div class="crash-head"><span></span><span>S&amp;P 500</span><span>Portfolio</span><span>Its deepest dip</span></div>` +
     h.crashes.map((c) => `<div class="crash-row">
@@ -498,7 +503,7 @@ const EXAMPLES = [
   { lead: "contrarian", kind: "Crashes", name: "Crashes", eg: "the 2008 great financial crisis", from: "2008-10-01", to: "2008-12-31",
     text: "In a crash, forced and fearful selling drives even great companies far below fair value, and these are the moments the Contrarian strategy waits for. As banks failed in late 2008, the Core strategy had already sold almost everything. Contrarian selectively made purchases, at times with over 70% of the portfolio, and sold within days as prices rebounded, making over 20% while the S&P 500 fell 22%." },
 ];
-async function renderExamples(root) {
+async function renderExamples(root, texts = {}) {
   const D = await fullDaily(["core", "contrarian", "compass"]);
   const B = [["core", "Core", "--wave"], ["contrarian", "Contrarian", "--opp"], ["compass", "Compass", "--kairos"]];
   const E = EXAMPLES.map((x) => {
@@ -511,7 +516,7 @@ async function renderExamples(root) {
       g *= 1 + D.model[i] / 100; s *= 1 + D.spx[i] / 100;
       dates.push(D.dates[i]); L.model.push((g - 1) * 100); L.spx.push((s - 1) * 100); B.forEach(([k]) => L[k].push(c[k] * 100));
     }
-    return { ...x, d0: D.dates[i0], d1: D.dates[i1], dates, L, port: (g - 1) * 100, spx: (s - 1) * 100, c: Object.fromEntries(B.map(([k]) => [k, c[k] * 100])) };
+    return { ...x, text: texts[x.lead] || x.text, d0: D.dates[i0], d1: D.dates[i1], dates, L, port: (g - 1) * 100, spx: (s - 1) * 100, c: Object.fromEntries(B.map(([k]) => [k, c[k] * 100])) };
   });
   const top = Math.max(...E.flatMap((e) => B.map(([k]) => Math.abs(e.c[k]))));      // one scale for all three
   root.innerHTML = E.map((e, j) => { const [, ln, lc] = B.find(([k]) => k === e.lead);
@@ -531,6 +536,70 @@ async function renderExamples(root) {
         ...B.map(([k, n, col]) => ({ name: n, endLabel: n, v: e.L[k], color: css(col), w: 2, tipFmt: f })),
         { name: "Portfolio", endLabel: "Portfolio", v: e.L.model, color: css("--ink"), w: 3, tipFmt: f }] },
     ], { padRight: 110, dayTicks: e.dates.length < 80, label: `${e.name}: portfolio, S&P 500 and each strategy's share of the return` }); });
+}
+
+/* ---------- professional pages (/pro/): same charts, plus the research numbers in data/pro.json ---------- */
+const PERIOD_NAME = (P, k) => k === "design" ? `Design, ${P.design.portfolio.start.slice(0, 4)}–${P.design.portfolio.end.slice(0, 4)}` : `Later, ${P.later.portfolio.start.slice(0, 4)}–${day(P.later.portfolio.end, { month: "short", year: "numeric" })}`;
+const num = (x, dp = 2) => x == null ? "–" : (+x.toFixed(dp) === 0 ? 0 : x).toFixed(dp).replace("-", "−");   // no "−0.00"
+
+async function proLanding(D, h, years) {
+  const J = await loadJSON("data/pro.json"), P = J.periods, d = P.design.portfolio, l = P.later.portfolio;
+  document.getElementById("stats").innerHTML = [
+    [pct(d.cagr, 1, false), "a year, 2000–2021", `${pct(l.cagr, 1, false)} since 2022`],
+    [num(d.sharpe), "Sharpe ratio, 2000–2021", `${num(l.sharpe)} since 2022`],
+    [pct(d.maxdd, 0), "max drawdown, 2000–2021", `${pct(l.maxdd, 0)} since 2022`],
+    [num(P.full.portfolio.beta_spx), "beta to the S&amp;P 500", `correlation ${num(P.full.portfolio.corr_spx)}`],
+  ].map(([v, lab, b]) => `<div><div class="v">${v}</div><div class="l">${lab}</div><div class="b">${b}</div></div>`).join("");
+  const f = J.factors.design.portfolio.weekly, fl = J.factors.later.portfolio.weekly;
+  const el = document.getElementById("alpha-txt");
+  if (el) el.textContent = `On weekly returns against the Fama-French five factors plus momentum, short-term reversal and betting-against-beta, alpha is ${f.alpha.toFixed(0)}% a year over 2000–2021 (t ${f.t_alpha.toFixed(1)}) and ${fl.alpha.toFixed(0)}% since 2022 (t ${fl.t_alpha.toFixed(1)}). Factors explain under a fifth of the variance.`;
+  const card = (cls, name, q, txt) => `<div class="lp-book ${cls}"><p class="kicker">${q}</p><h3>${name}</h3><p>${txt}</p></div>`;
+  document.getElementById("books").innerHTML =
+    card("wave", "Core", "Volatility-managed trend", "Long Nasdaq-100 members coming out of a high-volatility spell into a quiet advance, provided they are not lagging the index. Exits when volatility returns. Equal 1.5% positions, up to 50 names, entered and exited at the open. The main source of equity beta in the book.") +
+    card("opp", "Contrarian", "Short-term reversal", "Buys Nasdaq-100 members after capitulation-style selling, in up to three 3.3% tranches, and exits on the rebound, usually within days. In cash most of the time. Returns load on the short-term reversal factor, in effect payment for providing liquidity to forced sellers.") +
+    card("fut", "Compass", "Market timing", "A daily market-state model (breadth, volatility, sentiment, trend) traded through Nasdaq-100 futures. By default it hedges the stock books to near zero beta. On high-conviction readings it takes the whole book net long or short, scaled down when realized volatility is high.");
+  const c = J.corr.design;
+  const cr = document.getElementById("corr-txt");
+  if (cr) cr.textContent = `Daily correlation of the strategies' contributions, 2000–2021: Core and Contrarian ${num(c.core_contrarian)}, Contrarian and Compass ${num(c.contrarian_compass)}. Core and Compass ${num(c.core_compass)}, because Compass hedges Core's market exposure.`;
+}
+
+function renderProStats(root) {
+  loadJSON("data/pro.json").then((J) => {
+    const P = J.periods, cols = ["design", "later"];
+    const rows = [["Return a year", "cagr", (x) => pct(x, 1)], ["Volatility", "vol", (x) => pct(x, 1, false)], ["Sharpe ratio (rf = 0)", "sharpe", num],
+      ["Sortino ratio", "sortino", num], ["Max drawdown", "maxdd", (x) => pct(x, 1)], ["Calmar ratio", "calmar", num],
+      ["Longest drawdown (trading days)", "longest_dd", (x) => String(x)], ["Worst month", "worst_month", (x) => pct(x, 1)], ["Positive months", "pos_months", (x) => pct(x, 0, false)],
+      ["Worst calendar year", "worst_year", (x) => pct(x, 1)], ["Beta to S&amp;P 500", "beta_spx", num], ["Correlation to S&amp;P 500", "corr_spx", num],
+      ["Beta to Nasdaq-100", "beta_ndx", num], ["Correlation to Nasdaq-100", "corr_ndx", num]];
+    const split = `<table class="quant split-t"><tr><th class="l"></th>${cols.map((k) => `<th colspan="2">${PERIOD_NAME(P, k)}</th>`).join("")}</tr>
+      <tr class="subh"><td class="l"></td>${cols.map(() => `<td>Portfolio</td><td>S&amp;P 500</td>`).join("")}</tr>
+      ${rows.map(([lab, k, fm]) => `<tr><td class="l">${lab}</td>${cols.map((p) => `<td><b>${fm(P[p].portfolio[k])}</b></td><td>${k.startsWith("beta_spx") || k.startsWith("corr_spx") ? "–" : fm(P[p].spx[k])}</td>`).join("")}</tr>`).join("")}</table>`;
+    const bps = [...new Set(J.costs.map((c) => c.stock_bp))], nqs = [...new Set(J.costs.map((c) => c.nq_bp))];
+    const cell = (s, n, p) => { const c = J.costs.find((x) => x.stock_bp === s && x.nq_bp === n)[p]; return `<td${s === 5 && n === 2 ? ' class="base"' : ""}>${pct(c.cagr, 1, false)} · ${num(c.sharpe)}</td>`; };
+    const costs = cols.map((p) => `<h3 class="sub-h">${PERIOD_NAME(P, p)}: return a year · Sharpe</h3><table class="quant cost-t"><tr><th class="l">Stocks, per side</th>${nqs.map((n) => `<th>Futures ${n} bp</th>`).join("")}</tr>
+      ${bps.map((s) => `<tr><td class="l">${s} bp</td>${nqs.map((n) => cell(s, n, p)).join("")}</tr>`).join("")}</table>`).join("");
+    const FAC = [["Mkt-RF", "Market"], ["SMB", "Size"], ["HML", "Value"], ["RMW", "Profitability"], ["CMA", "Investment"], ["MOM", "Momentum"], ["STREV", "Short-term reversal"], ["BAB", "Betting against beta"]];
+    const who = [["portfolio", "Portfolio"], ["core", "Core"], ["contrarian", "Contrarian"], ["compass", "Compass"]];
+    const fx = (v) => `${num(v.b)}<span class="t">${num(v.t, 1)}</span>`;
+    const fac = cols.map((p) => { const F = J.factors[p];
+      return `<h3 class="sub-h">${p === "design" ? PERIOD_NAME(P, p) : "Later, 2022–" + day(F.portfolio.end, { month: "short", year: "numeric" })}</h3><table class="quant fac-t"><tr><th class="l"></th>${who.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+      <tr><td class="l">Alpha a year</td>${who.map(([k]) => `<td><b>${pct(F[k].weekly.alpha, 1)}</b><span class="t">${num(F[k].weekly.t_alpha, 1)}</span></td>`).join("")}</tr>
+      ${FAC.map(([k, n]) => `<tr><td class="l">${n}</td>${who.map(([w]) => `<td>${fx(F[w].weekly[k])}</td>`).join("")}</tr>`).join("")}
+      <tr><td class="l">R²</td>${who.map(([k]) => `<td>${num(F[k].weekly.r2)}</td>`).join("")}</tr></table>`; }).join("");
+    const T = J.turnover;
+    root.innerHTML = `
+    <section class="lp-sec"><p class="kicker">Design and later periods</p><h2 class="h2">Before and after 2022</h2>
+      <p class="lede pm-lede">The rules were designed on 2000–2021. Data from 2022 on was held back and used for one test of the version frozen on 13 October 2026, which returned 25.9% a year with a Sharpe ratio of 1.57 and a max drawdown of −11.7% over 2022 to October 2026. Three changes have been made since then and were checked against the later data too, so the later figures below are not a clean hold-out.</p>
+      <div class="scroll">${split}</div>
+      <p class="note">Daily returns of the current version, ${day(P.full.portfolio.start, { day: "numeric", month: "long", year: "numeric" })} to ${day(P.full.portfolio.end, { day: "numeric", month: "long", year: "numeric" })}, after trading costs, before any interest on idle cash. Futures are financed at the 3-month T-bill rate. S&amp;P 500 is the total-return index.</p></section>
+    <section class="lp-sec"><p class="kicker">Trading costs</p><h2 class="h2">Cost sensitivity</h2>
+      <p class="lede pm-lede">The base case (highlighted) charges 5 bp per side on stocks, plus $0.005 a share on Contrarian trades, and 2 bp per side on futures. Average gross exposure is ${(T.avg_gross * 100).toFixed(0)}% and the futures position turns over about ${T.nq_per_year.toFixed(0)} times its capital a year, so the futures cost matters more than the stock cost.</p>
+      ${costs}</section>
+    <section class="lp-sec"><p class="kicker">Factor exposure</p><h2 class="h2">What explains the returns</h2>
+      <p class="lede pm-lede">Weekly regressions on the Fama-French five factors, momentum and short-term reversal (Ken French data library) and betting-against-beta (AQR), with Newey-West t-statistics in grey. Strategy columns use each strategy's contribution to the whole account, so their loadings add up to the portfolio's. Returns are not net of the risk-free rate, so alpha is before any interest on cash.</p>
+      ${fac}
+      <p class="note">Daily correlation of the strategies' contributions, 2000–2021: Core and Contrarian ${num(J.corr.design.core_contrarian)}, Contrarian and Compass ${num(J.corr.design.contrarian_compass)}, Core and Compass ${num(J.corr.design.core_compass)} (Compass hedges Core). Since 2022: ${num(J.corr.later.core_contrarian)}, ${num(J.corr.later.contrarian_compass)} and ${num(J.corr.later.core_compass)}.</p></section>`;
+  }).catch(() => { root.innerHTML = ""; });
 }
 
 /* ---------- header: always shown on desktop; on phones it hides while scrolling down ---------- */
