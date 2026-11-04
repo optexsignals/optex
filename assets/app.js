@@ -228,7 +228,7 @@ function keyTable(d, cols) {
 
 function kairosChange(now, next) {
   const d = next - now;
-  let t = "No change";
+  let t = "None";
   if (Math.abs(d) >= 0.5) {
     if (Math.abs(next) < 0.5) t = `Close the ${now < 0 ? "short" : "long"} (now ${pct(now)})`;
     else if (Math.abs(now) < 0.5) t = `Open a ${next < 0 ? "short" : "long"} of ${pct(Math.abs(next), 0, false)}`;
