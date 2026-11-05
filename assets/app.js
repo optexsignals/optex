@@ -379,7 +379,7 @@ function renderPosition(s, root, { archived = false } = {}) {
 /* ---------- shared: full daily record ---------- */
 async function fullDaily() {
   const D = await loadJSON("data/history_daily.json");
-  if (LO) { D.model = D.model_lo; D.net = D.net_lo; }
+  if (LO) { D.model = D.model_lo; D.net = D.net_lo; if (D.net_close_lo) D.net_close = D.net_close_lo; }
   return D;
 }
 
@@ -412,7 +412,7 @@ async function record() {
       { h: 130, title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat([
         { name: NAME + " drawdown", v: ddOf(m), color: css("--wave"), w: 1.6, area: true, tipFmt: pf }]) },
       { h: 190, title: "Exposure, % of account equity", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, min: LO ? 0 : -100, max: 150, tickStep: 50, series: [
-        { name: "Exposure", v: sl("net"), color: css("--wave"), w: lw * 1.6, step: true, area: true, tipFmt: (v) => pct(v) }] },
+        { name: "Exposure", v: sl(D.net_close ? "net_close" : "net"), color: css("--wave"), w: lw * 1.6, step: true, area: true, tipFmt: (v) => pct(v) }] },
     ], { yearTicks: yrs > 2.5, yearEvery: yrs > 14 ? 4 : yrs > 7 ? 2 : 1, dayTicks: dates.length <= 30, axisAfter: 1, label: [NAME].concat(bms.map((x) => x.name)).join(" vs "),
       live: dates[0] < SHARED ? SHARED : null, markLabels: ["Live on X (long only)", ""],
       onBrush: (a, b) => perfSet({ zoom: [dates[a], dates[b]] }) });
