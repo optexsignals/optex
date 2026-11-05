@@ -1,1 +1,11 @@
-[]
+[
+ {
+  "asof": "2026-11-05",
+  "position": 95.0,
+  "previous": 0.0,
+  "day": -0.0,
+  "qqq_day": -6.49,
+  "provisional": true,
+  "published_utc": "2026-11-05T23:39:00Z"
+ }
+]
