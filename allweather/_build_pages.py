@@ -17,14 +17,14 @@ HEAD = """<!doctype html>
 <meta property="og:url" content="{url}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<meta property="og:image" content="https://optexmodel.com/share.png">
+<meta property="og:image" content="https://optexmodel.com/allweather/share.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="OPTEX: know what to buy, when to buy, and when to protect.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">
-<meta name="twitter:image" content="https://optexmodel.com/share.png">
+<meta name="twitter:image" content="https://optexmodel.com/allweather/share.png">
 <meta name="theme-color" content="#ffffff">
 <link rel="alternate" type="application/rss+xml" title="OPTEX" href="feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@ HEAD = """<!doctype html>
 """
 
 FOOT = """<footer><div class="wrap">
-  <div><span class="mark">OPTEX</span><p>optexmodel.com · <a href="archive.html">Every day, archived</a> · <a href="index.html#contact">Contact</a> · <a href="feed.xml">RSS</a></p></div>
+  <div><span class="mark">OPTEX</span><p>optexmodel.com/allweather · <a href="archive.html">Every day, archived</a> · <a href="index.html#contact">Contact</a> · <a href="feed.xml">RSS</a></p></div>
   <p>For information only. Not investment advice, and not an offer to buy or sell any security or fund. Performance shown is model performance, not the results of actual trading. Past performance is not a guide to the future. Trading involves risk of loss, and futures leverage increases it.</p>
 </div></footer>
 <script src="assets/app.js?v={v}"></script>
@@ -53,7 +53,7 @@ def page(fn, title, desc, which, body):
     a = {f"a{i}": (' aria-current="page"' if i == which else "") for i in range(5)}
     # version stamp from the asset files, so a normal refresh picks up any change; share card = static share.png (og.png is the daily chart for posts)
     v = int(max((HERE / "assets" / f).stat().st_mtime for f in ("style.css", "app.js")))
-    (HERE / fn).write_text(HEAD.format(title=title, desc=desc, v=v, url="https://optexmodel.com/" + ("" if fn == "index.html" else fn), **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
+    (HERE / fn).write_text(HEAD.format(title=title, desc=desc, v=v, url="https://optexmodel.com/allweather/" + ("" if fn == "index.html" else fn), **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
 
 
 

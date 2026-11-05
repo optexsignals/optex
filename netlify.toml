@@ -1,3 +1,5 @@
+# optexmodel.com           = OPTEX Market Timing Model (root)
+# optexmodel.com/allweather = OPTEX all-weather stock portfolio (moved here 2026-11; was the root)
 [build]
   publish = "."
 
@@ -8,11 +10,55 @@
     Access-Control-Allow-Origin = "*"
 
 [[headers]]
-  for = "/og.png"
+  for = "/allweather/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/allweather/og.png"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
-  for = "/feed.xml"
+  for = "/allweather/feed.xml"
   [headers.values]
     Content-Type = "application/rss+xml; charset=utf-8"
+
+# Old all-weather addresses from before the move. The Market Timing archive uses ?day=, so an old ?d= link is all-weather.
+[[redirects]]
+  from = "/archive.html"
+  to = "/allweather/archive.html?d=:d"
+  query = {d = ":d"}
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/portfolio.html"
+  to = "/allweather/portfolio.html"
+  status = 301
+
+[[redirects]]
+  from = "/feed.xml"
+  to = "/allweather/feed.xml"
+  status = 301
+
+[[redirects]]
+  from = "/og.png"
+  to = "/allweather/og.png"
+  status = 301
+
+[[redirects]]
+  from = "/share.png"
+  to = "/allweather/share.png"
+  status = 301
+
+[[redirects]]
+  from = "/posts/*"
+  to = "/allweather/posts/:splat"
+  status = 301
+
+[[redirects]]
+  from = "/pro/*"
+  to = "/allweather/pro/:splat"
+  status = 301
