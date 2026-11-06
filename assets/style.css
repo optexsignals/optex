@@ -60,7 +60,7 @@ a:hover { text-decoration-color: currentColor; }
 .dateline .when { font: 400 clamp(34px, 4.4vw, 52px)/1.05 var(--serif); letter-spacing: -0.02em; margin: 0; }
 .dateline .pub { margin: 0 0 8px; }
 .dateline .banner { grid-column: 1 / -1; justify-self: start; }
-.dateline .prov-note { grid-column: 1 / -1; margin: 10px 0 0; max-width: 62ch; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.dateline .prov-note { grid-column: 1 / -1; margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-3); }
 @media (max-width: 760px) { .dateline { grid-template-columns: 1fr; padding-top: 36px; } }
 .banner { display: inline-block; margin-top: 14px; font-size: 14px; color: var(--ink-2); }
 

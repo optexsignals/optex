@@ -341,7 +341,7 @@ function renderPosition(s, root, { archived = false } = {}) {
     <h1 class="when">${day(s.asof)}</h1>
     <p class="kicker pub">${when}</p>
     <div class="pos-mode">${modeBar()}</div>
-    ${s.provisional && !archived ? `<p class="prov-note">Provisional. Some market data arrive later in the evening, so the model runs again on the final numbers at midnight New York time. A change is rare, on average once or twice a year, and would be published and emailed straight away.</p>` : ""}
+    ${s.provisional && !archived ? `<p class="prov-note">Provisional. The model reruns on final market data at midnight New York time. A change is rare, about once or twice a year, and would be emailed straight away.</p>` : ""}
     ${archived ? `<a class="banner" href="position.html">This is an archived day. See the current position →</a>` : ""}
   </div>
 
