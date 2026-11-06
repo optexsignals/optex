@@ -258,7 +258,7 @@ function timeChart(host, dates, panels, opts = {}) {
     hit.addEventListener("pointerup", (ev) => {
       if (a0 == null) return;
       const b = idx(ev), lo = Math.min(a0, b), hi = Math.max(a0, b); a0 = null; sel.setAttribute("visibility", "hidden");
-      if (hi - lo >= 3) opts.onBrush(lo, hi);
+      if (hi - lo >= 3) opts.onBrush(lo, hi); else if (opts.onClick) opts.onClick();
     });
   }
   hit.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); dots.forEach((d) => d.c.setAttribute("visibility", "hidden")); });
@@ -389,6 +389,7 @@ async function record() {
   const D = await fullDaily(), st = Object.assign(PERF, { bs: ["qqq"] });
   const zr = document.getElementById("zoom-reset");
   const draw = () => {
+    const full = !document.getElementById("chart-modal").hidden, host = document.getElementById(full ? "chart-full" : "chart");
     const last = D.dates[D.dates.length - 1], end = new Date(last + "T12:00:00Z");
     let i0 = 0, i1 = D.dates.length;
     if (st.zoom) { i0 = Math.max(0, D.dates.indexOf(st.zoom[0]) - 1); i1 = D.dates.indexOf(st.zoom[1]) + 1; }
@@ -407,7 +408,7 @@ async function record() {
       : st.r === "ALL" ? "since " + dates[0].slice(0, 4) : st.r === "X" ? "since 10 Oct 2023" : st.r;
     document.getElementById("row").innerHTML = cell(`Return, ${span}`, ret(m), ret) + (ann(m) != null ? cell("Per year", ann(m), ann) : "");
     const yrs = dates.length / 252, log = yrs > 4, lw = yrs > 4 ? 0.5 : 1.4, pf = (v) => pct(v, 1);
-    timeChart(document.getElementById("chart"), dates, [
+    timeChart(host, dates, [
       { h: 340, log, title: "Growth of 100", fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: 1.5, tipFmt: (v) => pct(v - 100, 1) })).concat([
         { name: NAME, v: m, color: css("--wave"), w: 2.4, tipFmt: (v) => pct(v - 100, 1) }]) },
       { h: 130, title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat([
@@ -416,10 +417,19 @@ async function record() {
         { name: "Exposure", v: sl(D.net_close ? "net_close" : "net"), color: css("--wave"), w: lw * 1.6, step: true, area: true, tipFmt: (v) => pct(v) }] },
     ], { yearTicks: yrs > 2.5, yearEvery: yrs > 14 ? 4 : yrs > 7 ? 2 : 1, dayTicks: dates.length <= 30, axisAfter: 1, label: [NAME].concat(bms.map((x) => x.name)).join(" vs "),
       live: dates[0] < SHARED ? SHARED : null, markLabels: ["Live on X (long only)", ""],
-      onBrush: (a, b) => perfSet({ zoom: [dates[a], dates[b]] }) });
+      onBrush: (a, b) => perfSet({ zoom: [dates[a], dates[b]] }), onClick: full ? null : () => openFull() });
   };
   draw();
   PERF.subs.push(draw);
+  // full-screen chart: click the chart or the button; Esc, ✕ or a click outside closes it; redraws on resize/rotate
+  const modal = document.getElementById("chart-modal");
+  const openFull = () => { modal.hidden = false; document.body.style.overflow = "hidden"; draw(); };
+  const closeFull = () => { modal.hidden = true; document.body.style.overflow = ""; document.getElementById("chart-full").innerHTML = ""; draw(); };
+  document.getElementById("chart-expand").addEventListener("click", openFull);
+  modal.querySelector(".cm-close").addEventListener("click", closeFull);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeFull(); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closeFull(); });
+  let rz; addEventListener("resize", () => { if (modal.hidden) return; clearTimeout(rz); rz = setTimeout(draw, 150); });
   document.querySelectorAll(".zoom-reset").forEach((b) => b.addEventListener("click", () => perfSet({ zoom: null })));
   document.querySelectorAll("#seg button").forEach((bt) => bt.addEventListener("click", () => {
     bt.setAttribute("aria-pressed", bt.getAttribute("aria-pressed") !== "true"); st.bs = benchOn("#seg"); draw();
@@ -433,11 +443,15 @@ function renderPerformance(root) {
     <div class="bar-head"><h1 class="h2 perf-h1">Performance</h1><div class="bar-tools">${modeBar()}${benchBtns("seg")}</div></div>
     <p class="note x-note">${LO ? `Long only: the version shared on ${xLink("X")} since ${sharedLong()}, with every short signal held in cash.` : `Long/short: the full model. Its long-only version has been shared on ${xLink("X")} since ${sharedLong()}.`}</p>
     <div class="range-bar">${rangeBtns("ranges", "X")}
-      <span class="zoom-hint">Drag across the chart to zoom in</span><button class="zoom-reset" id="zoom-reset" hidden>Reset zoom</button></div>
+      <span class="zoom-hint">Drag across the chart to zoom in</span><button class="zoom-reset" id="zoom-reset" hidden>Reset zoom</button><button class="chart-expand" id="chart-expand">⤢ Full screen</button></div>
     <div class="row" id="row"></div>
-    <div class="chart" id="chart"></div>
-    
+    <div class="chart chart-click" id="chart"></div>
   </div>
+  <div class="chart-modal" id="chart-modal" hidden><div class="cm-box">
+    <div class="cm-bar"><span class="cm-title">${NAME} vs QQQ</span><span class="zoom-hint">Drag across the chart to zoom in</span><button class="zoom-reset" hidden>Reset zoom</button><button class="cm-close" aria-label="Close">✕</button></div>
+    <p class="cm-rotate">Turn your phone sideways for a bigger chart.</p>
+    <div class="chart" id="chart-full"></div>
+  </div></div>
   <div class="record keynums">
     <div class="bar-head"><h2 class="h2">Key numbers</h2>${benchBtns("kn-seg")}</div>
     <div class="range-bar">${rangeBtns("kn-ranges", "X")}<button class="zoom-reset" id="kn-zoom-reset" hidden>Reset zoom</button></div>
