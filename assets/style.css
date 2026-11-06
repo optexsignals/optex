@@ -608,7 +608,7 @@ table.quant.edge-t td:not(.l) { width: 30%; }
 .ix-facts { grid-template-columns: repeat(2, 1fr); max-width: 760px; }
 .lp-hero-text h1.h1-two .ln { display: block; white-space: nowrap; }
 .lp-hero-text h1.h1-two { font-size: clamp(30px, 4.6vw, 70px); }
-@media (max-width: 900px) { .lp-hero-text h1.h1-two { font-size: clamp(28px, 8.2vw, 60px); } }
+@media (max-width: 900px) { .lp-hero-text h1.h1-two { font-size: clamp(28px, 9.8vw, 60px); } }
 @media (max-width: 900px) { .lp-hero-text:has(.h1-two) { grid-template-columns: 1fr; } }
 @media (min-width: 901px) { #solution .sec-split { grid-template-columns: max-content minmax(0, 1fr); column-gap: 72px; } }
 @media (min-width: 901px) { .hero-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 56px; align-items: center; } }
