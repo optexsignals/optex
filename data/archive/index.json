@@ -7,5 +7,14 @@
   "qqq_day": -6.49,
   "provisional": true,
   "published_utc": "2026-11-05T23:39:00Z"
+ },
+ {
+  "asof": "2026-11-06",
+  "position": 95.0,
+  "previous": 95.0,
+  "day": 1.3287,
+  "qqq_day": 1.4,
+  "provisional": true,
+  "published_utc": "2026-11-06T21:00:22Z"
  }
 ]
