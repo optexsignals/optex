@@ -464,7 +464,7 @@ function renderPerformance(root) {
     <div class="scroll" id="years" style="margin-top:18px"></div>
   </div>
   <p class="note" id="costs-note"></p>
-  <p class="more" style="margin-top:44px"><a href="archive.html">Archive →</a> &nbsp; <a href="data/optex_history.csv" download>Download the full history (CSV) →</a></p>`;
+  <p class="more" style="margin-top:44px"><a href="archive.html">Archive →</a> &nbsp; <a href="data/optex_history.csv" download>Download the full history since 2000 (CSV)</a></p>`;
   record();
   keySection();
   document.getElementById("costs-note").textContent = "Returns are QQQ's total return, dividends included, times the position held, with no trading costs, borrowing costs or interest on cash. The S&P 500 includes dividends.";
