@@ -620,3 +620,8 @@ table.quant.edge-t td:not(.l) { width: 30%; }
   .eq .op { display: block; text-align: center; padding: 2px 0; font-size: 30px; line-height: 1.1; }
   .eq .sg { display: none; }
 }
+
+/* home chart: live badge; non-italic highlight in the hero h1 */
+.chart-head .live-tag { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: var(--ink); }
+.chart-head .live-tag i { width: 7px; height: 7px; border-radius: 50%; background: var(--wave); box-shadow: 0 0 0 3px color-mix(in srgb, var(--wave) 22%, transparent); }
+.lp-hero-text h1 em.plain { font-style: normal; }
