@@ -390,6 +390,8 @@ async function record() {
   const zr = document.getElementById("zoom-reset");
   const draw = () => {
     const full = !document.getElementById("chart-modal").hidden, host = document.getElementById(full ? "chart-full" : "chart");
+    // full screen: squash the panels so the whole chart fits the window height (landscape phones, wide screens)
+    const k = full && host.clientWidth >= 600 ? Math.max(0.3, Math.min(1.2, ((innerHeight - 70) * 1000 / host.clientWidth - 170) / 660)) : 1;
     const last = D.dates[D.dates.length - 1], end = new Date(last + "T12:00:00Z");
     let i0 = 0, i1 = D.dates.length;
     if (st.zoom) { i0 = Math.max(0, D.dates.indexOf(st.zoom[0]) - 1); i1 = D.dates.indexOf(st.zoom[1]) + 1; }
@@ -409,11 +411,11 @@ async function record() {
     document.getElementById("row").innerHTML = cell(`Return, ${span}`, ret(m), ret) + (ann(m) != null ? cell("Per year", ann(m), ann) : "");
     const yrs = dates.length / 252, log = yrs > 4, lw = yrs > 4 ? 0.5 : 1.4, pf = (v) => pct(v, 1);
     timeChart(host, dates, [
-      { h: 340, log, title: "Growth of 100", fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: 1.5, tipFmt: (v) => pct(v - 100, 1) })).concat([
+      { h: Math.round(340 * k), log, title: "Growth of 100", fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: 1.5, tipFmt: (v) => pct(v - 100, 1) })).concat([
         { name: NAME, v: m, color: css("--wave"), w: 2.4, tipFmt: (v) => pct(v - 100, 1) }]) },
-      { h: 130, title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat([
+      { h: Math.round(130 * k), title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat([
         { name: NAME + " drawdown", v: ddOf(m), color: css("--wave"), w: 1.6, area: true, tipFmt: pf }]) },
-      { h: 190, title: "Exposure, % of account equity", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, min: LO ? 0 : -100, max: 150, tickStep: 50, series: [
+      { h: Math.round(190 * k), title: "Exposure, % of account equity", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, min: LO ? 0 : -100, max: 150, tickStep: 50, series: [
         { name: "Exposure", v: sl(D.net_close ? "net_close" : "net"), color: css("--wave"), w: lw * 1.6, step: true, area: true, tipFmt: (v) => pct(v) }] },
     ], { yearTicks: yrs > 2.5, yearEvery: yrs > 14 ? 4 : yrs > 7 ? 2 : 1, dayTicks: dates.length <= 30, axisAfter: 1, label: [NAME].concat(bms.map((x) => x.name)).join(" vs "),
       live: dates[0] < SHARED ? SHARED : null, markLabels: ["Live on X (long only)", ""],
