@@ -556,11 +556,11 @@ async function landing() {
 // so the three add up exactly to the model's return over the period.
 const EXAMPLES = [
   { lead: "lt", name: "Bull markets", eg: "October 2023 to July 2024", from: "2023-10-10", to: "2024-07-10",
-    text: "Long, steady advances are where QQQ makes most of its gains, and the long-term strategy is built to ride them, holding long exposure to capture the market's upward drift. The tactical strategy scales extra exposure in and out with the natural ebb and flow of prices, while the short side strategy stays out of the way." },
+    text: "Long, steady advances are where QQQ makes most of its gains, and the long-term strategy is built to ride them, holding long exposure to capture the market's upward drift. The tactical strategy scales extra exposure in and out with the natural ebb and flow of prices, while the short strategy stays out of the way." },
   { lead: "short", name: "Bear markets", eg: "the 2022 bear market", from: "2022-01-03", to: "2022-10-13",
-    text: "Slow, grinding bear markets wear investors down with sharp rallies and renewed sell-offs. Once the market turns fragile, the long-term strategy steps aside and stays out until conditions improve. The short side strategy fades the rallies that fail, while the tactical strategy trades the sharp bounces in between, so the model can make money in both directions while buy-and-hold investors sit through the losses." },
+    text: "Slow, grinding bear markets wear investors down with sharp rallies and renewed sell-offs. Once the market turns fragile, the long-term strategy steps aside and stays out until conditions improve. The short strategy fades the rallies that fail, while the tactical strategy trades the sharp bounces in between, so the model can make money in both directions while buy-and-hold investors sit through the losses." },
   { lead: "short", name: "Crashes", eg: "the 2020 Covid crash", from: "2020-02-19", to: "2020-03-23",
-    text: "Crashes happen in fragile markets, with prices falling faster than most investors can react. By design, the spike in volatility shifts the model's focus to its two faster strategies. The short side strategy profits from the collapse, while the tactical strategy trades the sharp relief rallies along the way." },
+    text: "Crashes happen in fragile markets, with prices falling faster than most investors can react. By design, the spike in volatility shifts the model's focus to its two faster strategies. The short strategy profits from the collapse, while the tactical strategy trades the sharp relief rallies along the way." },
 
 ];
 async function renderExamples(root) {
