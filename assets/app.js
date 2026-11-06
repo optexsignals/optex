@@ -42,7 +42,7 @@ function windowStart(dates, r) {
 }
 const RANGE_NAME = { X: "Since 10 Oct 2023, live on X", "1W": "Last week", "1M": "Last month", "3M": "Last 3 months", "6M": "Last 6 months", YTD: "Year to date", "12M": "Last 12 months", "3Y": "Last 3 years", "5Y": "Last 5 years", "10Y": "Last 10 years" };
 const RANGES = [["1W", 7], ["1M", 31], ["3M", 92], ["6M", 183], ["YTD", 0], ["12M", 366], ["3Y", 1096], ["5Y", 1827], ["10Y", 3653], ["X", 0], ["ALL", 1e6]];
-const RANGE_LABEL = { X: "Since 10/10/23" };
+const RANGE_LABEL = { X: "Since Oct 23" };
 
 /* ---------- quant statistics (QuantStats-style), all from daily returns in % ---------- */
 function perfStats(d, pr) {
@@ -528,8 +528,6 @@ async function landing() {
       { name: "QQQ", v: grow(D.qqq), color: css("--ink-3"), w: 1.6, tipFmt: (v) => pct(v - 100, 0) },
       { name: NAME, v: grow(D.model), color: css("--wave"), w: 2.6, wash: 0.1, tipFmt: (v) => pct(v - 100, 0) }] },
   ], { yearTicks: true, yearEvery: 1, label: NAME + " vs QQQ since 10 October 2023" });
-  const t = document.querySelector(".ch-title");
-  if (t) t.innerHTML = LO ? `Signals posted live on ${xLink("X @OptexSignals")} since Oct 2023` : `Since Oct 2023 · long-only signals posted live on ${xLink("X @OptexSignals")}`;
   heroChart();
   let narrow = innerWidth < 600;
   addEventListener("resize", () => { if ((innerWidth < 600) !== narrow) { narrow = innerWidth < 600; heroChart(); } });
