@@ -364,7 +364,7 @@ function renderPosition(s, root, { archived = false } = {}) {
     <div class="op">+</div>
     <div class="term"><div class="l"><i class="chip opp"></i>Tactical</div><div class="n">${pct(P.st, 0, false)}</div></div>
     <div class="op">−</div>
-    <div class="term"><div class="l"><i class="chip fut"></i>Short side</div><div class="n">${pct(Math.abs(P.short), 0, false)}</div></div>
+    <div class="term"><div class="l"><i class="chip fut"></i>Short</div><div class="n">${pct(Math.abs(P.short), 0, false)}</div></div>
     <div class="op">=</div>
     <div class="term net"><div class="l">Position</div><div class="n">${pct(x)}</div></div>
   </div>
@@ -565,7 +565,7 @@ const EXAMPLES = [
 ];
 async function renderExamples(root) {
   const D = await loadJSON("data/history_daily.json");
-  const B = [["lt", "Long-term", "--wave"], ["st", "Tactical", "--opp"], ["short", "Short side", "--kairos"]];
+  const B = [["lt", "Long-term", "--wave"], ["st", "Tactical", "--opp"], ["short", "Short", "--kairos"]];
   const E = EXAMPLES.map((x) => {
     const i0 = D.dates.findIndex((d) => d >= x.from), i1 = D.dates.findLastIndex((d) => d <= x.to);
     let g = 1, q = 1; const c = { lt: 0, st: 0, short: 0 }, L = { model: [0], qqq: [0], lt: [0], st: [0], short: [0] };
