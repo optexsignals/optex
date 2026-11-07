@@ -641,3 +641,10 @@ table.quant.edge-t td:not(.l) { width: 30%; }
 #chart-full { position: relative; }
 #chart-full svg { width: 100%; height: auto; max-height: calc(100vh - 90px); }
 @media (max-height: 500px) { .chart-modal { padding: 0; } .cm-box { border-radius: 0; height: 100%; padding: 8px 14px; } .cm-rotate { display: none; } }
+
+/* pro: two tables side by side */
+.pro-two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+@media (max-width: 860px) { .pro-two { grid-template-columns: 1fr; } }
+.cap-v { font: 400 clamp(40px, 4.6vw, 60px)/1 var(--serif); color: var(--wave); letter-spacing: -0.02em; margin-bottom: 10px; }
+html[data-site="pro"] .lp-hero-text .lp-hero-side { justify-self: end; width: 100%; max-width: 460px; }
+@media (max-width: 900px) { html[data-site="pro"] .lp-hero-text h1.h1-two { font-size: clamp(26px, 9.2vw, 60px); } }
