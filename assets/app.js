@@ -31,9 +31,18 @@ function modeBar() {
 }
 document.addEventListener("click", (ev) => {
   const b = ev.target.closest(".seg.mode button"); if (!b) return;
-  try { localStorage.setItem("optex-mode", b.dataset.m); } catch (e) {}
+  try { localStorage.setItem("optex-mode", b.dataset.m); sessionStorage.setItem("optex-scroll", String(scrollY)); } catch (e) {}
   location.reload();
 });
+// after a Long/short <-> Long only switch, come back to the same place: the page fills in asynchronously, so keep
+// trying until it is tall enough (the browser's own scroll restoration fires before the content is there)
+const KEEP_Y = (() => { try { const y = sessionStorage.getItem("optex-scroll"); sessionStorage.removeItem("optex-scroll"); return y == null ? null : +y; } catch (e) { return null; } })();
+if (KEEP_Y != null) {
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  const t0 = Date.now();
+  const go = () => { scrollTo(0, KEEP_Y); if (Math.abs(scrollY - KEEP_Y) > 2 && Date.now() - t0 < 3000) requestAnimationFrame(go); };
+  requestAnimationFrame(go);
+}
 function windowStart(dates, r) {
   if (r === "X") return Math.max(0, dates.findIndex((d) => d >= SHARED));
   const last = dates[dates.length - 1], end = new Date(last + "T12:00:00Z");
@@ -475,8 +484,8 @@ async function proCapture() {
   const J = await loadJSON("data/pro.json"), m = J.periods.full.model, A = J.factors.full.model.weekly;
   const el = document.getElementById("capture");
   if (el) el.innerHTML = [
-    [pct(m.upcap_qqq, 0, false), "up-month capture", "Average model return in QQQ's up months, as a share of QQQ's"],
-    [pct(m.downcap_qqq, 0), "down-month capture", "Negative: on average the model makes money in QQQ's down months"],
+    [pct(m.upcap_qqq, 0, false), "up-month capture", `In months when QQQ rises, the model <em>gains</em> ${Math.round(m.upcap_qqq)}% as much, on average.`],
+    [pct(m.downcap_qqq, 0), "down-month capture", `In months when QQQ falls, the model <em>gains</em> ${Math.round(-m.downcap_qqq)}% as much as QQQ loses, on average.`],
     [num(m.beta_down_qqq), "beta on QQQ down days", `against ${num(m.beta_up_qqq)} on up days`],
   ].map(([v, l, b]) => `<div><div class="cap-v">${v}</div><h3>${l}</h3><p>${b}</p></div>`).join("");
   const t = document.getElementById("alpha-txt");
@@ -589,7 +598,7 @@ async function keySection() {
 
 /* ---------- landing page ---------- */
 async function renderLanding() {
-  try { await landing(); } finally { const el = location.hash && document.querySelector(location.hash); if (el) el.scrollIntoView(); }
+  try { await landing(); } finally { const el = KEEP_Y == null && location.hash && document.querySelector(location.hash); if (el) el.scrollIntoView(); }
 }
 async function landing() {
   const [h, D, s] = await Promise.all([loadJSON("data/history.json"), fullDaily(), loadJSON("data/latest.json").catch(() => null)]);
