@@ -8,6 +8,7 @@ const pct = (x, dp = 0, sign = true) => {
   if (+t === 0) return (0).toFixed(dp) + "%";              // no "−0%"
   return (sign && x > 0 ? "+" : "") + t.replace("-", "−") + "%";
 };
+const num = (x, dp = 2) => x == null ? "–" : x.toFixed(dp).replace("-", "−");
 const tone = (x) => x == null ? "" : x > 0 ? "up" : x < 0 ? "down" : "";
 const svg = (tag, a = {}) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
 const day = (d, o = { weekday: "long", day: "numeric", month: "long" }) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
@@ -184,7 +185,7 @@ function timeChart(host, dates, panels, opts = {}) {
     const pad = (hi - lo) * 0.05 || 1; lo -= pad; hi += pad;
     const t0 = top + th[pi], Y = (v) => t0 + p.h - ((v - lo) / (hi - lo)) * p.h;
     const ticks = [];
-    if (p.log) { for (let k = Math.floor(lo); k <= hi; k++) [1, 2, 5].forEach((m) => { const v = k + Math.log10(m); if (v >= lo && v <= hi) ticks.push(v); }); }
+    if (p.log) { for (let k = Math.floor(lo); k <= hi; k++) (p.logMult || [1, 2, 5]).forEach((m) => { const v = k + Math.log10(m); if (v >= lo && v <= hi) ticks.push(v); }); }
     else { const st = p.tickStep || niceStep((hi - lo) / 3); for (let v = Math.ceil(lo / st) * st; v <= hi + 1e-9; v += st) ticks.push(v); }
     if (p.title) { const tt = svg("text", { x: x0, y: top + 13, style: `fill:${ink};font-weight:600;font-size:13px` }); tt.textContent = p.title; s.appendChild(tt); }
     ticks.forEach((v) => {
@@ -443,7 +444,7 @@ function renderPerformance(root) {
   root.innerHTML = `
   <div class="record perf-top">
     <div class="bar-head"><h1 class="h2 perf-h1">Performance</h1><div class="bar-tools">${modeBar()}${benchBtns("seg")}</div></div>
-    <p class="note x-note">${LO ? `Long only: the version shared on ${xLink("X")} since ${sharedLong()}, with every short signal held in cash.` : `Long/short: the full model. Its long-only version has been shared on ${xLink("X")} since ${sharedLong()}.`}</p>
+    <p class="note x-note">${LO ? `Long only: the version shared live on ${xLink("X")} since ${sharedLong()}, with every short signal held in cash.` : `Long/short: the full model. Its long-only version has been shared live on ${xLink("X")} since ${sharedLong()}.`}</p>
     <div class="range-bar">${rangeBtns("ranges", "X")}
       <span class="zoom-hint">Drag across the chart to zoom in</span><button class="zoom-reset" id="zoom-reset" hidden>Reset zoom</button><button class="chart-expand" id="chart-expand">⤢ Full screen</button></div>
     <div class="row" id="row"></div>
@@ -464,10 +465,98 @@ function renderPerformance(root) {
     <div class="scroll" id="years" style="margin-top:18px"></div>
   </div>
   <p class="note" id="costs-note"></p>
-  <p class="more" style="margin-top:44px"><a href="archive.html">Archive →</a> &nbsp; <a href="data/optex_history.csv" download>Download the full history since 2000 (CSV)</a></p>`;
+  <p class="more" style="margin-top:44px"><a href="archive.html">Archive →</a> &nbsp; <a href="${BASE}data/optex_history.csv" download>Download the full history since 2000 (CSV)</a></p>`;
   record();
   keySection();
-  document.getElementById("costs-note").textContent = "Returns are QQQ's total return, dividends included, times the position held, with no trading costs, borrowing costs or interest on cash. The S&P 500 includes dividends.";
+  if (!PRO) document.getElementById("costs-note").textContent = "Returns are QQQ's total return, dividends included, times the position held, with no trading costs, borrowing costs or interest on cash. The S&P 500 includes dividends.";
+}
+/* ---------- pro landing: capture tiles and the factor line ---------- */
+async function proCapture() {
+  const J = await loadJSON("data/pro.json"), m = J.periods.full.model, A = J.factors.full.model.weekly;
+  const el = document.getElementById("capture");
+  if (el) el.innerHTML = [
+    [pct(m.upcap_qqq, 0, false), "up-month capture", "Average model return in QQQ's up months, as a share of QQQ's"],
+    [pct(m.downcap_qqq, 0), "down-month capture", "Negative: on average the model makes money in QQQ's down months"],
+    [num(m.beta_down_qqq), "beta on QQQ down days", `against ${num(m.beta_up_qqq)} on up days`],
+  ].map(([v, l, b]) => `<div><div class="cap-v">${v}</div><h3>${l}</h3><p>${b}</p></div>`).join("");
+  const t = document.getElementById("alpha-txt");
+  if (t) t.textContent = `Alpha of ${A.alpha.toFixed(0)}% a year (t ${A.t_alpha.toFixed(1)}) after controlling for the Fama-French five factors, momentum, short-term reversal and betting-against-beta. The factors explain ${Math.round(A.r2 * 100)}% of weekly returns: the edge is in when to hold the market, not in what kind of risk is held.`;
+}
+
+/* ---------- pro: full statistics under the performance page (data/pro.json, built by _pro_data.py) ---------- */
+function renderProStats(root) {
+  loadJSON("data/pro.json").then((J) => {
+    const P = J.periods, F = P.full, E = J.exposure, longD = (d) => day(d, { day: "numeric", month: "long", year: "numeric" });
+    const yr = (d) => d.slice(0, 4), years = (new Date(F.model.end) - new Date(F.model.start)) / 3.156e10;
+    const rows = [["CAGR", "cagr", (x) => pct(x, 1)], ["Volatility", "vol", (x) => pct(x, 1, false)], ["Sharpe ratio (rf = 0)", "sharpe", num],
+      ["Sortino ratio", "sortino", num], ["Max drawdown", "maxdd", (x) => pct(x, 1)], ["Calmar ratio", "calmar", num],
+      ["Longest drawdown (trading days)", "longest_dd", (x) => String(x)], ["Worst day", "worst_day", (x) => pct(x, 1)], ["Worst month", "worst_month", (x) => pct(x, 1)],
+      ["Positive months", "pos_months", (x) => pct(x, 0, false)], ["Worst calendar year", "worst_year", (x) => pct(x, 1)], ["Skew, daily", "skew", num],
+      ["Beta to QQQ, daily", "beta_qqq", num], ["Beta to QQQ on up days", "beta_up_qqq", num], ["Beta to QQQ on down days", "beta_down_qqq", num],
+      ["Correlation to QQQ, daily", "corr_qqq", num], ["Correlation to QQQ, monthly", "corr_qqq_m", num],
+      ["Up-month capture vs QQQ", "upcap_qqq", (x) => pct(x, 0, false)], ["Down-month capture vs QQQ", "downcap_qqq", (x) => pct(x, 0, false)],
+      ["Beta to S&amp;P 500, daily", "beta_spx", num], ["Correlation to S&amp;P 500, daily", "corr_spx", num]];
+    const cols = [["model", "Long/short"], ["model_lo", "Long only"], ["qqq", "QQQ"], ["spx", "S&amp;P 500"]];
+    const v = (o, k, fm) => (o[k] == null ? "–" : fm(o[k]));
+    const risk = `<table class="quant split-t"><tr><th class="l"></th>${cols.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+      ${rows.map(([lab, k, fm]) => `<tr><td class="l">${lab}</td>${cols.map(([c], i) => `<td>${i === 0 ? "<b>" : ""}${v(F[c], k, fm)}${i === 0 ? "</b>" : ""}</td>`).join("")}</tr>`).join("")}</table>`;
+
+    const per = [["design", `${yr(P.design.model.start)}–2021`], ["later", `2022–${yr(P.later.model.end)}`], ["live", "Live on X, since Oct 2023"], ["full", "Full record"]];
+    const prow = [["CAGR", "cagr", (x) => pct(x, 1)], ["Sharpe ratio", "sharpe", num], ["Max drawdown", "maxdd", (x) => pct(x, 1)], ["Beta to QQQ", "beta_qqq", num]];
+    const periods = `<table class="quant split-t"><tr><th class="l"></th>${per.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+      ${prow.map(([lab, k, fm]) => `<tr><td class="l">${lab}</td>${per.map(([p]) => `<td><b>${v(P[p].model, k, fm)}</b><span class="t">QQQ ${k === "beta_qqq" ? "1.00" : v(P[p].qqq, k, fm)}</span></td>`).join("")}</tr>`).join("")}</table>`;
+
+    const expo = `<table class="quant split-t"><tr><th class="l">Share of days</th><th></th></tr>
+      <tr><td class="l">Above 100% long (up to 150%)</td><td><b>${pct(E.pct_above_100, 0, false)}</b></td></tr>
+      <tr><td class="l">Long, up to 100%</td><td><b>${pct(E.pct_long, 0, false)}</b></td></tr>
+      <tr><td class="l">Flat</td><td><b>${pct(E.pct_flat, 0, false)}</b></td></tr>
+      <tr><td class="l">Short (down to −100%)</td><td><b>${pct(E.pct_short, 0, false)}</b></td></tr>
+      <tr><td class="l">Average net exposure</td><td><b>${pct(E.avg_net, 0)}</b></td></tr>
+      <tr><td class="l">Average gross exposure</td><td><b>${pct(E.avg_gross, 0, false)}</b></td></tr>
+      <tr><td class="l">Days with a position change, per year</td><td><b>${Math.round(E.changes_per_year)}</b></td></tr>
+      <tr><td class="l">Exposure traded per year, one way</td><td><b>${(E.turnover_per_year / 100).toFixed(0)}× equity</b></td></tr></table>`;
+    const strat = `<table class="quant split-t"><tr><th class="l"></th><th>Long-term</th><th>Tactical</th><th>Short</th></tr>
+      <tr><td class="l">Share of days active</td><td>${pct(E.pct_lt_on, 0, false)}</td><td>${pct(E.pct_st_on, 0, false)}</td><td>${pct(E.pct_short_on, 0, false)}</td></tr>
+      <tr><td class="l">Average holding, trading days</td><td>${Math.round(E.lt_spell_days)}</td><td>${Math.round(E.st_spell_days)}</td><td>${Math.round(E.short_spell_days)}</td></tr>
+      <tr><td class="l">Trades per year</td><td>${(E.lt_spells / years).toFixed(1)}</td><td>${E.st_spells_per_year.toFixed(0)}</td><td>${E.short_spells_per_year.toFixed(0)}</td></tr>
+      <tr><td class="l">Contribution a year, simple</td>${["lt", "st", "short"].map((k) => `<td><b>${pct(J.strategies[k].full.ann_contrib, 1)}</b></td>`).join("")}</tr>
+      <tr><td class="l">Sharpe ratio of the contribution</td>${["lt", "st", "short"].map((k) => `<td>${num(J.strategies[k].full.sharpe)}</td>`).join("")}</tr></table>`;
+
+    const X = J.execution;
+    const exec = `<table class="quant split-t"><tr><th class="l"></th>${per.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+      <tr><td class="l">Traded at the close</td>${per.map(([p]) => `<td><b>${pct(X[p].close.cagr, 1, false)}</b> · ${num(X[p].close.sharpe)}</td>`).join("")}</tr>
+      <tr><td class="l">Traded at the next open</td>${per.map(([p]) => `<td><b>${pct(X[p].next_open.cagr, 1, false)}</b> · ${num(X[p].next_open.sharpe)}</td>`).join("")}</tr></table>`;
+
+    const A = J.factors.full;
+    const FAC = [["Mkt-RF", "Market"], ["SMB", "Size"], ["HML", "Value"], ["RMW", "Profitability"], ["CMA", "Investment"], ["MOM", "Momentum"], ["STREV", "Short-term reversal"], ["BAB", "Betting against beta"]];
+    const who = [["model", "Model"], ["lt", "Long-term"], ["st", "Tactical"], ["short", "Short"], ["qqq", "QQQ"]];
+    const weak = (t) => Math.abs(t) < 2 ? ' class="weak"' : "";
+    const fx = (o) => `<span${weak(o.t)}>${num(o.b)}<span class="t">t ${num(o.t, 1)}</span></span>`;
+    const fac = `<table class="quant fac-t"><tr><th class="l"></th>${who.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+      <tr><td class="l">Alpha a year</td>${who.map(([k]) => `<td><span${weak(A[k].weekly.t_alpha)}><b>${pct(A[k].weekly.alpha, 1)}</b><span class="t">t ${num(A[k].weekly.t_alpha, 1)}</span></span></td>`).join("")}</tr>
+      ${FAC.map(([k, n]) => `<tr><td class="l">${n}</td>${who.map(([w]) => `<td>${fx(A[w].weekly[k])}</td>`).join("")}</tr>`).join("")}
+      <tr><td class="l">R²</td>${who.map(([k]) => `<td>${num(A[k].weekly.r2)}</td>`).join("")}</tr></table>`;
+    const c = J.corr;
+
+    root.innerHTML = `
+    <section class="lp-sec"><p class="kicker">Risk statistics</p><h2 class="h2">The full record</h2>
+      <div class="scroll">${risk}</div>
+      <p class="note">Daily returns, ${longD(F.model.start)} to ${longD(F.model.end)}. Model returns are the position held times QQQ's total return. QQQ and the S&amp;P 500 include dividends.</p></section>
+    <section class="lp-sec"><p class="kicker">By period</p><h2 class="h2">Backtest and live</h2>
+      <p class="lede pm-lede">Everything before October 2023 is the current rules run on history. Since then the long-only signals have been posted live on X as they happened. The grey figure under each number is QQQ over the same days.</p>
+      <div class="scroll">${periods}</div></section>
+    <section class="lp-sec"><p class="kicker">Exposure and trading</p><h2 class="h2">How the book is positioned</h2>
+      <div class="pro-two"><div class="scroll">${expo}</div><div class="scroll">${strat}</div></div>
+      <p class="note">A strategy's contribution is its own exposure times QQQ's return, as a share of the whole account; the three add up to the model's daily return. Daily correlation of the contributions: long-term and tactical ${num(c.lt_st)}, long-term and short ${num(c.lt_short)}, tactical and short ${num(c.st_short)}.</p></section>
+    <section class="lp-sec"><p class="kicker">Implementation</p><h2 class="h2">Execution timing</h2>
+      <h3 class="sub-h">CAGR · Sharpe ratio</h3>
+      <p class="lede pm-lede">The position is published within seconds of the close. Trading the close itself means acting on the signal as it forms; waiting for the next open gives up part of the edge, most of all in recent years.</p>
+      <div class="scroll">${exec}</div></section>
+    <section class="lp-sec"><p class="kicker">Factor exposure</p><h2 class="h2">What explains the returns</h2>
+      <p class="lede pm-lede">Weekly regressions, ${yr(A.model.start)} to ${day(A.model.end, { month: "long", year: "numeric" })}, on the Fama-French five factors, momentum and short-term reversal (Ken French data library) and betting-against-beta (AQR), with each t-statistic underneath in grey (Newey-West). Estimates with a t-statistic below 2 are faded. Each strategy is its contribution to the account.</p>
+      <div class="scroll">${fac}</div>
+      <p class="note">QQQ itself shows positive alpha against these factors over the period, from its technology tilt. The model's alpha is several times larger, and the factors explain only ${pct(A.model.weekly.r2 * 100, 0, false)} of its weekly variance.</p></section>`;
+  }).catch((e) => { console.error(e); root.innerHTML = ""; });
 }
 async function keySection() {
   const D = await fullDaily(), st = PERF;
@@ -510,7 +599,16 @@ async function landing() {
   const run = (f) => { let g = 1, pk = 1, m = 0; for (let i = k0 + 1; i < D.dates.length; i++) { g *= 1 + D[f][i] / 100; pk = Math.max(pk, g); m = Math.min(m, g / pk - 1); } return { g, ann: (g ** (1 / yrsX) - 1) * 100, dd: m * 100 }; };
   const M = run("model"), Q = run("qqq"), usd = (g) => "$" + Math.round(10000 * g).toLocaleString("en-US");
   const since = day(SHARED, { day: "numeric", month: "short", year: "numeric" });
-  document.getElementById("stats").innerHTML = [
+  if (PRO) {
+    const a = D.model.slice(k0 + 1), b = D.qqq.slice(k0 + 1), mean = (x) => x.reduce((s, v) => s + v, 0) / x.length;
+    const sd = (x) => { const u = mean(x); return Math.sqrt(x.reduce((s, v) => s + (v - u) ** 2, 0) / (x.length - 1)); };
+    const sharpe = (x) => (mean(x) / sd(x)) * Math.sqrt(252);
+    document.getElementById("stats").innerHTML = [
+      [pct(M.ann, 1, false), "CAGR", `QQQ ${pct(Q.ann, 1, false)}`],
+      [pct(M.dd, 1), "max drawdown", `QQQ ${pct(Q.dd, 1)}`],
+      [num(sharpe(a)), "Sharpe ratio", `QQQ ${num(sharpe(b))}`],
+    ].map(([v, l, b]) => `<div><div class="v">${v}</div><div class="l">${l}</div><div class="b">${b}</div></div>`).join("");
+  } else document.getElementById("stats").innerHTML = [
     [pct(M.ann, 1, false), "annual return", `QQQ ${pct(Q.ann, 1, false)}`],
     [pct(M.dd, 1), "worst fall, peak to trough", `QQQ ${pct(Q.dd, 1)}`],
     [usd(M.g), "growth of $10,000", `QQQ ${usd(Q.g)}`],
@@ -563,7 +661,7 @@ const EXAMPLES = [
     text: "Crashes happen in fragile markets, with prices falling faster than most investors can react. By design, the spike in volatility shifts the model's focus to its two faster strategies. The short strategy profits from the collapse, while the tactical strategy trades the sharp relief rallies along the way." },
 
 ];
-async function renderExamples(root) {
+async function renderExamples(root, texts) {
   const D = await loadJSON("data/history_daily.json");
   const B = [["lt", "Long-term", "--wave"], ["st", "Tactical", "--opp"], ["short", "Short", "--kairos"]];
   const E = EXAMPLES.map((x) => {
@@ -575,6 +673,7 @@ async function renderExamples(root) {
       g *= 1 + D.model[i] / 100; q *= 1 + D.qqq[i] / 100;
       dates.push(D.dates[i]); L.model.push((g - 1) * 100); L.qqq.push((q - 1) * 100); B.forEach(([k]) => L[k].push(c[k] * 100));
     }
+    if (texts) x = { ...x, text: texts[EXAMPLES.indexOf(x)] };
     return { ...x, dates, L, port: (g - 1) * 100, qqq: (q - 1) * 100, c: Object.fromEntries(B.map(([k]) => [k, c[k] * 100])) };
   });
   const top = Math.max(...E.flatMap((e) => B.map(([k]) => Math.abs(e.c[k]))));
