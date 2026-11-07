@@ -1,4 +1,5 @@
-# optexmodel.com           = OPTEX Market Timing Model (root)
+# optexmodel.com           = OPTEX Market Timing Model (root; the professional version since 2026-11-07)
+# optexmodel.com/r         = OPTEX Market Timing Model, retail version
 # optexmodel.com/allweather = OPTEX all-weather stock portfolio (moved here 2026-11; was the root)
 [build]
   publish = "."

@@ -647,3 +647,4 @@ table.quant.edge-t td:not(.l) { width: 30%; }
 @media (max-width: 860px) { .pro-two { grid-template-columns: 1fr; } }
 .cap-v { font: 400 clamp(40px, 4.6vw, 60px)/1 var(--serif); color: var(--wave); letter-spacing: -0.02em; margin-bottom: 10px; }
 html[data-site="pro"] .lp-hero-text .lp-hero-side { justify-self: end; width: 100%; max-width: 460px; }
+.lp-three.cols-2 { grid-template-columns: 1fr 1fr; } @media (max-width: 700px) { .lp-three.cols-2 { grid-template-columns: 1fr; } }
