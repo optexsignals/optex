@@ -197,6 +197,11 @@ function timeChart(host, dates, panels, opts = {}) {
     if (p.log) { for (let k = Math.floor(lo); k <= hi; k++) (p.logMult || [1, 2, 5]).forEach((m) => { const v = k + Math.log10(m); if (v >= lo && v <= hi) ticks.push(v); }); }
     else { const st = p.tickStep || niceStep((hi - lo) / 3); for (let v = Math.ceil(lo / st) * st; v <= hi + 1e-9; v += st) ticks.push(v); }
     if (p.title) { const tt = svg("text", { x: x0, y: top + 13, style: `fill:${ink};font-weight:600;font-size:13px` }); tt.textContent = p.title; s.appendChild(tt); }
+    if (p.title && p.legend) {   // [[symbol, colour, label], ...] right-aligned on the title row
+      const lg = svg("text", { x: x1, y: top + 13, "text-anchor": "end", style: "font-size:12px" });
+      p.legend.forEach(([sym, col, lab], k) => { const a = svg("tspan", { style: `fill:${col}` }); a.textContent = (k ? " " : "") + sym + " "; const b = svg("tspan"); b.textContent = phone ? lab.replace(/^Exposure (\w)/, (_, c) => c.toUpperCase()) : lab; lg.appendChild(a); lg.appendChild(b); });
+      s.appendChild(lg);
+    }
     ticks.forEach((v) => {
       const z = Math.abs(v) < 1e-9 && p.zero;
       s.appendChild(svg("line", { x1: x0, x2: x1, y1: Y(v), y2: Y(v), stroke: z ? ink : faint, "stroke-width": z ? 1.5 : 1 }));
@@ -209,6 +214,11 @@ function timeChart(host, dates, panels, opts = {}) {
       if (se.wash) s.appendChild(svg("path", { d: d + `V${t0 + p.h}H${X(0)}Z`, fill: se.color, opacity: se.wash }));   // soft fill down to the panel floor
       s.appendChild(svg("path", { d, fill: "none", stroke: se.color, "stroke-width": se.w || 2, "stroke-linejoin": "round" }));
     });
+    p.series.forEach((se) => (se.marks || []).forEach(({ i, up, color }) => {
+      const v = se.v[i]; if (v == null) return;
+      const x = X(i), y = Y(v), r = phone ? 4.5 : 5.5;
+      s.appendChild(svg("path", { d: up ? `M${x},${y - r}L${x + r},${y + r * 0.8}L${x - r},${y + r * 0.8}Z` : `M${x},${y + r}L${x + r},${y - r * 0.8}L${x - r},${y - r * 0.8}Z`, fill: color }));
+    }));
     const ends = p.series.filter((se) => se.endLabel).map((se) => ({ se, y: Y(se.v[se.v.length - 1]) })).sort((a, b) => a.y - b.y);
     const ls = opts.labelSize || 15;
     ends.forEach((o, i) => { if (i && o.y - ends[i - 1].y < ls * 1.2) o.y = ends[i - 1].y + ls * 1.2; });
@@ -396,7 +406,7 @@ async function fullDaily() {
 
 /* ---------- performance chart: growth, drawdown, position ---------- */
 async function record() {
-  const D = await fullDaily(), st = Object.assign(PERF, { bs: ["qqq"] });
+  const D = await fullDaily(), st = Object.assign(PERF, { bs: ["qqq"] }), ink0 = css("--ink");
   const zr = document.getElementById("zoom-reset");
   const draw = () => {
     const full = !document.getElementById("chart-modal").hidden, host = document.getElementById(full ? "chart-full" : "chart");
@@ -420,9 +430,15 @@ async function record() {
       : st.r === "ALL" ? "since " + dates[0].slice(0, 4) : st.r === "X" ? "since 10 Oct 2023" : st.r;
     document.getElementById("row").innerHTML = cell(`Return, ${span}`, ret(m), ret) + (ann(m) != null ? cell("Per year", ann(m), ann) : "");
     const yrs = dates.length / 252, log = yrs > 4, lw = yrs > 4 ? 0.5 : 1.4, pf = (v) => pct(v, 1);
+    const pos = sl(D.net_close ? "net_close" : "net"), wave = css("--wave");
+    // 6 months or less on screen: arrows where the exposure set at the close went up or down, like the daily email
+    const short = (new Date(dates[dates.length - 1]) - new Date(dates[0])) / 864e5 <= 190;
+    const marks = short ? pos.flatMap((v, i) => (i && Math.abs(v - pos[i - 1]) > 0.5 ? [{ i, up: v > pos[i - 1], color: v > pos[i - 1] ? wave : ink0 }] : [])) : [];
+    const onB = bms.find((x) => x.key === "qqq") || bms[0];   // arrows on QQQ, or the S&P 500 when QQQ is hidden; never on the OPTEX line
     timeChart(host, dates, [
-      { h: Math.round(340 * k), log, title: "Growth of 100", fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: 1.5, tipFmt: (v) => pct(v - 100, 1) })).concat([
-        { name: NAME, v: m, color: css("--wave"), w: 2.4, tipFmt: (v) => pct(v - 100, 1) }]) },
+      { h: Math.round(340 * k), log, title: "Growth of 100", legend: marks.length && onB ? [["▲", wave, "Exposure increased"], ["▼", ink0, "Exposure reduced"]] : null,
+        fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: 1.5, marks: x === onB ? marks : null, tipFmt: (v) => pct(v - 100, 1) })).concat([
+        { name: NAME, v: m, color: wave, w: 2.4, tipFmt: (v) => pct(v - 100, 1) }]) },
       { h: Math.round(130 * k), title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat([
         { name: NAME + " drawdown", v: ddOf(m), color: css("--wave"), w: 1.6, area: true, tipFmt: pf }]) },
       { h: Math.round(190 * k), title: "Exposure, % of account equity", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, min: LO ? 0 : -100, max: 150, tickStep: 50, series: [
