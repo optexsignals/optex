@@ -27,6 +27,14 @@
   [headers.values]
     Content-Type = "application/rss+xml; charset=utf-8"
 
+# optexmodel.com/live (2026-11-08): the page's /api/live/* requests are forwarded to the model service on the VM
+# (Tailscale Funnel). Only prices go out and only a position comes back; the model stays on the VM.
+[[redirects]]
+  from = "/api/live/*"
+  to = "https://optex-vm.tail69c3ee.ts.net/api/live/:splat"
+  status = 200
+  force = true
+
 # Old all-weather addresses from before the move. The Market Timing archive uses ?day=, so an old ?d= link is all-weather.
 [[redirects]]
   from = "/archive.html"

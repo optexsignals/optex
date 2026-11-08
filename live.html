@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" data-site="pro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPTEX | Live Estimate</title>
+<meta name="description" content="Today's OPTEX Market Timing position estimated from live prices, as if the market closed now.">
+<link rel="canonical" href="https://optexmodel.com/live.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OPTEX Market Timing Model">
+<meta property="og:url" content="https://optexmodel.com/live.html">
+<meta property="og:title" content="OPTEX | Live Estimate">
+<meta property="og:description" content="Today's OPTEX Market Timing position estimated from live prices, as if the market closed now.">
+<meta property="og:image" content="https://optexmodel.com/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://optexmodel.com/share.png">
+<meta name="twitter:title" content="OPTEX | Live Estimate">
+<meta name="twitter:description" content="Today's OPTEX Market Timing position estimated from live prices, as if the market closed now.">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=1794142387">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2315171a'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='white' text-anchor='middle'>O</text></svg>">
+</head>
+<body>
+<header class="mast"><div class="wrap">
+  <a class="mark" href="index.html">OPTEX<small>Market Timing Model</small></a>
+  <a class="cta cta-m" href="position.html">Current position</a>
+  <button class="menu-btn" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <nav class="nav"><a href="index.html">Home</a><a href="how-it-works.html">Investment process</a><a href="performance.html">Performance</a><a href="archive.html">Archive</a><a class="cta" href="position.html">Current position</a></nav>
+</div></header>
+<main class="wrap lp-thanks live">
+  <p class="kicker">Live estimate</p>
+  <h1>Today's position, live.</h1>
+  <p class="lede">The model run on today's prices so far, as if the market closed now. The official position is set at the close and emailed then. NYSE breadth and AAII sentiment carry forward from the last close, as in the close run.</p>
+  <section class="lv-out" id="lv-out" aria-live="polite"><p class="lv-msg">Loading live prices…</p></section>
+  <form class="lv-in" id="lv-form" autocomplete="off">
+    <fieldset><legend>QQQ</legend>
+      <label>Open<input name="open" inputmode="decimal"></label>
+      <label>High<input name="high" inputmode="decimal"></label>
+      <label>Low<input name="low" inputmode="decimal"></label>
+      <label>Close<input name="close" inputmode="decimal"></label>
+      <label>Volume<input name="volume" inputmode="numeric"></label>
+    </fieldset>
+    <fieldset><legend>Index levels</legend>
+      <label>VIX close<input name="vix" inputmode="decimal"></label>
+      <label>S&amp;P 500 close<input name="spx" inputmode="decimal"></label>
+    </fieldset>
+    <div class="lv-btns"><button type="submit">Calculate</button><button type="button" id="lv-reset" class="lv-ghost">Reset to live prices</button></div>
+    <p class="lv-note" id="lv-src"></p>
+  </form>
+</main>
+<style>
+.live .lv-out { border: 1px solid var(--rule); border-radius: 6px; padding: 22px 24px; margin: 8px 0 28px; max-width: 760px; background: var(--paper-2); }
+.live .lv-big { font: 400 clamp(48px, 8vw, 84px)/1 var(--serif); letter-spacing: -0.02em; margin: 2px 0 8px; }
+.live .lv-sub { color: var(--ink-2); margin: 0 0 14px; font-size: 16px; }
+.live .lv-parts { display: flex; flex-wrap: wrap; gap: 8px 26px; margin: 0; padding: 12px 0 0; border-top: 1px solid var(--rule); font-size: 15px; color: var(--ink-2); }
+.live .lv-parts b { color: var(--ink); font-weight: 600; }
+.live .lv-msg { margin: 0; color: var(--ink-2); }
+.live .lv-err { color: var(--down); }
+.live .lv-in { max-width: 760px; }
+.live fieldset { border: 0; padding: 0; margin: 0 0 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+.live legend { font: 500 13px var(--text); color: var(--ink-3); padding: 0; margin-bottom: 8px; }
+.live label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-2); }
+.live input { font: 500 16px var(--text); color: var(--ink); background: var(--paper); border: 1px solid var(--rule-2); border-radius: 4px; padding: 9px 10px; width: 100%; box-sizing: border-box; }
+.live input.lv-edit { border-color: var(--ink); background: var(--paper-2); }
+.live .lv-btns { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 10px; }
+.live .lv-btns button { font: 500 15px var(--text); padding: 10px 18px; border-radius: 4px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
+.live .lv-btns .lv-ghost { background: transparent; color: var(--ink); }
+.live .lv-note { font-size: 13px; color: var(--ink-3); margin: 6px 0 0; }
+@media (max-width: 600px) { .live .lv-out { padding: 18px 16px; } }
+</style>
+<script>
+(() => {
+  const API = "/api/live/", F = ["open", "high", "low", "close", "volume", "vix", "spx"];
+  const form = document.getElementById("lv-form"), out = document.getElementById("lv-out"), src = document.getElementById("lv-src");
+  let live = null, busy = false, again = false, timer = null;
+  const sg = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(Math.round(v)) + "%";
+  const num = (v) => Number(String(v).replace(/[, ]/g, ""));
+  const fmt = (k, v) => k === "volume" ? Math.round(v).toLocaleString("en-US") : Number(v).toFixed(2);
+  const msg = (t, err) => { out.innerHTML = `<p class="lv-msg${err ? " lv-err" : ""}">${t}</p>`; };
+  function fill(d) {
+    F.forEach((k) => { const i = form.elements[k]; i.value = fmt(k, d[k]); i.classList.remove("lv-edit"); });
+  }
+  function mark() {
+    F.forEach((k) => { const i = form.elements[k]; i.classList.toggle("lv-edit", !!live && Math.abs(num(i.value) - live[k]) > 1e-6 * Math.max(1, Math.abs(live[k]))); });
+  }
+  function show(r) {
+    const ch = r.position - r.previous, edited = F.some((k) => form.elements[k].classList.contains("lv-edit"));
+    out.innerHTML = `<p class="kicker">${edited ? "Estimate with your prices" : "Estimate from live prices"} · ${r.date}</p>
+      <div class="lv-big">${sg(r.position)}</div>
+      <p class="lv-sub">${ch === 0 ? `No change from the last close (${sg(r.previous)}, ${r.previous_date})` : `${ch > 0 ? "Up" : "Down"} ${Math.abs(Math.round(ch))} points from ${sg(r.previous)} at the last close (${r.previous_date})`} · QQQ ${r.qqq_change_pct > 0 ? "+" : ""}${r.qqq_change_pct.toFixed(2)}% on the day</p>
+      <p class="lv-parts"><span>Long-term <b>${sg(r.parts.lt)}</b></span><span>Tactical <b>${sg(r.parts.st)}</b></span><span>Short <b>${sg(r.parts.short)}</b></span><span>LT score <b>${r.lt_score}/${r.lt_max}</b></span></p>`;
+  }
+  async function calc() {
+    if (busy) { again = true; return; }
+    const body = {};
+    for (const k of F) { const v = num(form.elements[k].value); if (!isFinite(v) || form.elements[k].value === "") { msg(`Enter a number for ${k}.`, true); return; } body[k] = v; }
+    busy = true; mark();
+    try {
+      const r = await fetch(API + "position", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const j = await r.json();
+      if (!r.ok) msg(j.error || "The model could not run.", true); else show(j);
+    } catch (e) { msg("The live service is not reachable right now.", true); }
+    busy = false;
+    if (again) { again = false; calc(); }
+  }
+  async function load() {
+    msg("Loading live prices…");
+    try {
+      const r = await fetch(API + "inputs", { cache: "no-store" });
+      if (!r.ok) throw new Error();
+      live = await r.json(); fill(live);
+      src.textContent = `Prices from Yahoo Finance at ${live.fetched_et.slice(11, 16)} ET (may be delayed). ${live.session === "open" ? "Market open: the bar so far." : "Market closed: the last session's bar."} Edit any box to try other prices.`;
+      calc();
+    } catch (e) { msg("The live service is not reachable right now. Try again in a minute.", true); }
+  }
+  form.addEventListener("submit", (e) => { e.preventDefault(); calc(); });
+  form.addEventListener("input", () => { mark(); clearTimeout(timer); timer = setTimeout(calc, 700); });
+  document.getElementById("lv-reset").addEventListener("click", load);
+  load();
+})();
+</script>
+<div class="lp">
+<section class="lp-end"><div class="wrap">
+  <h2>One position, in your inbox, at the close.</h2>
+  <form class="signup" method="post" action="https://buttondown.com/api/emails/embed-subscribe/optexqqq">
+      <input type="hidden" name="embed" value="1">
+      <input type="email" name="email" required placeholder="Your email address" aria-label="Email address" autocomplete="email">
+      <button type="submit">Get it free</button>
+    </form>
+    <p class="fine">One email a day, at the close. Free. Unsubscribe any time.</p>
+</div></section>
+</div>
+<footer><div class="wrap">
+  <div><span class="mark">OPTEX</span><p>Market Timing Model · long-only signals posted live on <a href="https://x.com/OptexSignals" target="_blank" rel="noopener">X @OptexSignals</a> since October 2023 · optexmodel.com · <a href="archive.html">Archive</a> · <a href="https://github.com/optexsignals/optex/commits/main/data/latest.json" target="_blank" rel="noopener">Public record on GitHub</a> · <a href="index.html#contact">Contact</a></p></div>
+  <p>For information only. Not investment advice, and not an offer to buy or sell any security or fund. Performance shown is model performance, not the results of actual trading. Past performance is not a guide to the future. Trading involves risk of loss, and leverage and short selling increase it.</p>
+</div></footer>
+<script src="assets/app.js?v=1794142387"></script>
+</body>
+</html>
