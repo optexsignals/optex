@@ -5,7 +5,7 @@ HERE = Path(__file__).resolve().parent
 REPO_URL = "https://github.com/optexsignals/optex"   # the public repo Netlify deploys from
 
 HEAD = """<!doctype html>
-<html lang="en">
+<html lang="en" data-base="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -26,10 +26,10 @@ HEAD = """<!doctype html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="https://optexmodel.com/allweather/share.png">
 <meta name="theme-color" content="#ffffff">
-<link rel="alternate" type="application/rss+xml" title="OPTEX" href="feed.xml">
+<link rel="alternate" type="application/rss+xml" title="OPTEX" href="../feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v={v}">
+<link rel="stylesheet" href="../assets/style.css?v={v}">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2315171a'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='white' text-anchor='middle'>O</text></svg>">
 </head>
 <body>
@@ -42,22 +42,26 @@ HEAD = """<!doctype html>
 """
 
 FOOT = """<footer><div class="wrap">
-  <div><span class="mark">OPTEX</span><p>optexmodel.com/allweather · <a href="archive.html">Every day, archived</a> · <a href="index.html#contact">Contact</a> · <a href="feed.xml">RSS</a></p></div>
+  <div><span class="mark">OPTEX</span><p>optexmodel.com/allweather/r · <a href="archive.html">Every day, archived</a> · <a href="index.html#contact">Contact</a> · <a href="../feed.xml">RSS</a></p></div>
   <p>For information only. Not investment advice, and not an offer to buy or sell any security or fund. Performance shown is model performance, not the results of actual trading. Past performance is not a guide to the future. Trading involves risk of loss, and futures leverage increases it.</p>
 </div></footer>
-<script src="assets/app.js?v={v}"></script>
+<script src="../assets/app.js?v={v}"></script>
 """
 
 
-def page(fn, title, desc, which, body):
+def page(fn, title, desc, which, body, pro=False):
     a = {f"a{i}": (' aria-current="page"' if i == which else "") for i in range(5)}
     # version stamp from the asset files, so a normal refresh picks up any change; share card = static share.png (og.png is the daily chart for posts)
     v = int(max((HERE / "assets" / f).stat().st_mtime for f in ("style.css", "app.js")))
-    (HERE / fn).write_text(HEAD.format(title=title, desc=desc, v=v, url="https://optexmodel.com/allweather/" + ("" if fn == "index.html" else fn), **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
+    # pro = optexmodel.com/allweather (root of this folder); retail = optexmodel.com/allweather/r
+    url = "https://optexmodel.com/allweather/" + ("" if pro else "r/") + ("" if fn == "index.html" else fn)
+    out = HERE / ("" if pro else "r") / fn
+    out.parent.mkdir(exist_ok=True)
+    out.write_text((PRO_HEAD if pro else HEAD).format(title=title, desc=desc, v=v, url=url, **a) + body.replace("@REPO@", REPO_URL).replace("{v}", str(v)) + "</body>\n</html>\n", encoding="utf-8")
 
 
 
-# sign-up posts straight to Buttondown (double opt-in); Buttondown then redirects to thanks.html (set in its Subscribing settings)
+# one Buttondown list (optex) shared by pro and retail; sign-up posts straight to Buttondown (double opt-in); Buttondown then redirects to thanks.html (set in its Subscribing settings)
 SIGNUP = """<form class="signup" method="post" action="https://buttondown.com/api/emails/embed-subscribe/optex">
       <input type="hidden" name="embed" value="1">
       <input type="email" name="email" required placeholder="Your email address" aria-label="Email address" autocomplete="email">
@@ -161,7 +165,7 @@ LANDING = """<main class="lp">
   <p class="kicker">The crash test</p>
   <h2>Markets are crashing.<br>Should you hold, sell or buy?</h2>
   </div>
-  <p class="lede">When markets sell off and volatility spikes, it is stressful, and that is exactly when good decisions are hardest to make. The portfolio has no nerves to lose. It follows rules set in advance, whatever the headlines say. Here is how it handled every major S&amp;P 500 sell-off since 2008.</p>
+  <p class="lede">When markets sell off and volatility spikes, it is stressful, and that is exactly when good decisions are hardest to make. The portfolio has no nerves to lose. It follows rules set in advance, whatever the headlines say. Here is how it handled the biggest S&amp;P 500 sell-offs since 2000.</p>
   </div>
   <div class="crash" id="crash"></div>
 </section>
@@ -351,4 +355,5 @@ page("archive.html", "Archive | OPTEX", "Every day of the OPTEX all-weather stoc
 page("performance.html", "Performance | OPTEX", "The track record of the OPTEX all-weather stock portfolio against the S&amp;P 500 and Nasdaq-100.", 1, PERFORMANCE)
 page("how-it-works.html", "How It Works | OPTEX",
      "How the OPTEX all-weather stock portfolio works: Core, Contrarian and Compass.", 2, HOW)
+exec((HERE / "_pro_pages.py").read_text(encoding="utf-8"))   # /pro/: same layout, wording for traders and professionals
 print("pages written")

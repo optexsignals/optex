@@ -10,7 +10,9 @@ const pct = (x, dp = 0, sign = true) => {
 const tone = (x) => x == null ? "" : x > 0 ? "up" : x < 0 ? "down" : "";
 const svg = (tag, a = {}) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
 const day = (d, o = { weekday: "long", day: "numeric", month: "long" }) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
-async function loadJSON(u) { const r = await fetch(u, { cache: "no-cache" }); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }
+// pages under /pro/ set <html data-base="../"> so they read the same data files as the main site
+const BASE = document.documentElement.dataset.base || "", PRO = document.documentElement.dataset.site === "pro";
+async function loadJSON(u) { const r = await fetch(/^(https?:|\/)/.test(u) ? u : BASE + u, { cache: "no-cache" }); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }
 
 /* ---------- home: the portfolio after the next open ---------- */
 function renderPortfolio(s, root, { archived = false } = {}) {
@@ -74,7 +76,7 @@ async function record(s, archived) {
     const se = s.series, toR = (g) => g.map((v, i) => i ? (v / g[i - 1] - 1) * 100 : 0);
     D = { dates: se.dates, model: toR(se.model), spx: toR(se.spx), qqq: toR(se.qqq), net: se.net, lv: se.lv || se.stocks, har: se.har || se.dates.map(() => 0), nq: se.nq };
   } else D = await fullDaily(["lv", "har", "nq"]);
-  const st = { bs: ["spx"], r: archived ? "ALL" : "5Y", zoom: null };
+  const st = archived ? { bs: ["spx"], r: "ALL", zoom: null } : Object.assign(PERF, { bs: ["spx"] });
   const zr = document.getElementById("zoom-reset");
   const draw = () => {
     const last = D.dates[D.dates.length - 1], end = new Date(last + "T12:00:00Z");
@@ -105,15 +107,16 @@ async function record(s, archived) {
         { name: "Compass exposure", v: sl("nq"), color: css("--kairos"), w: lw, step: true, tipFmt: (v) => pct(v) },
         { name: "Net exposure", v: sl("net"), color: css("--ink"), w: lw * 1.6, step: true, tipFmt: (v) => pct(v) }] },
     ], { yearTicks: yrs > 2.5, yearEvery: yrs > 14 ? 4 : yrs > 7 ? 2 : 1, dayTicks: dates.length <= 30, axisAfter: 1, label: ["Portfolio"].concat(bms.map((x) => x.name)).join(" vs "),
-      onBrush: (a, b) => { st.zoom = [dates[a], dates[b]]; draw(); } });
+      onBrush: (a, b) => perfSet({ zoom: [dates[a], dates[b]] }) });
   };
   draw();
-  if (zr) zr.addEventListener("click", () => { st.zoom = null; draw(); });
+  PERF.subs.push(draw);
+  document.querySelectorAll(".zoom-reset").forEach((b) => b.addEventListener("click", () => perfSet({ zoom: null })));
   document.querySelectorAll("#seg button").forEach((bt) => bt.addEventListener("click", () => {
     bt.setAttribute("aria-pressed", bt.getAttribute("aria-pressed") !== "true"); st.bs = benchOn("#seg"); draw();
   }));
   document.querySelectorAll("#ranges button").forEach((bt) => bt.addEventListener("click", () => {
-    document.querySelectorAll("#ranges button").forEach((o) => o.setAttribute("aria-pressed", o === bt)); st.r = bt.dataset.r; st.zoom = null; draw();
+    perfSet({ r: bt.dataset.r, zoom: null });
   }));
 }
 
@@ -397,18 +400,26 @@ async function landing() {
   const [h, D] = await Promise.all([loadJSON("data/history.json"), fullDaily()]);
   const years = calendarYears(D);
   const st = h.stats.full, lose = (k) => years.filter((y) => y[k] < 0).length;
+  if (PRO) proLanding(D, h, years);          // pro: its own stats and strategy cards, same chart, sell-offs and years
+  else {
   document.getElementById("stats").innerHTML = [
     [pct(st.r.cagr, 1, false), "annual return", `S&P 500 ${pct(st.spx.cagr, 1, false)}`],
     [pct(st.r.maxdd, 0), "worst fall, peak to trough", `S&P 500 ${pct(st.spx.maxdd, 0)}`],
     [String(lose("model")), `losing years out of ${years.length}`, `S&P 500: ${lose("spx")}`],
   ].map(([v, l, b]) => `<div><div class="v">${v}</div><div class="l">${l}</div><div class="b">${b}</div></div>`).join("");
 
-  const card = (cls, name, q, txt) => `<div class="lp-book ${cls}"><p class="kicker">${q}</p><h3>${name}</h3><p>${txt}</p></div>`;
-  document.getElementById("books").innerHTML =
-    card("wave", "Core", "The long-term engine", "Owns strong, high-quality companies in steady uptrends, the kind that consistently beat the market. Highly selective, yet diversified: up to 50 positions, spread across sectors. This is the strategy that captures big, powerful advances from the start, before you hear about them.") +
+  document.getElementById("books").innerHTML = bookCards();
+  }
+  landingRest(D, h, years);
+}
+// the three strategy cards, shared by the main and pro home pages
+function bookCards(text = {}, kick = {}) {   // text / kick: per-strategy wording and labels that replace the main site's (pro page)
+  const card = (cls, name, q, txt) => `<div class="lp-book ${cls}"><p class="kicker">${kick[name] || q}</p><h3>${name}</h3><p>${text[name] || txt}</p></div>`;
+  return card("wave", "Core", "The long-term engine", "Owns strong, high-quality companies in steady uptrends, the kind that consistently beat the market. Highly selective, yet diversified: up to 50 positions, spread across sectors. This is the strategy that captures big, powerful advances from the start, before you hear about them.") +
     card("opp", "Contrarian", "The opportunist", "Buys high-quality stocks when other investors are panicking. Short-term trades in the world's top companies, held for days rather than months. This is how the portfolio turns investor emotion into extra return.") +
     card("fut", "Compass", "The risk manager", "Assesses the entire market every day and builds a directional view. Most days its job is to protect Core and Contrarian by hedging out their market risk, but when it has high conviction of a move in either direction, it takes the entire portfolio long or short. This is how the portfolio profits in all types of market: bull, bear and everything in between.");
-
+}
+function landingRest(D, h, years) {
   document.getElementById("crash").innerHTML = `<div class="crash-head"><span></span><span>S&amp;P 500</span><span>Portfolio</span><span>Its deepest dip</span></div>` +
     h.crashes.map((c) => `<div class="crash-row">
       <div class="crash-name"><b>${c.name}</b><span>${day(c.from, { month: "short", year: "numeric" })} – ${day(c.to, { month: "short", year: "numeric" })}</span></div>
@@ -435,6 +446,14 @@ async function landing() {
 /* ---------- performance page ---------- */
 const rangeBtns = (id, def) => `<div class="seg ranges" id="${id}">${RANGES.map(([k]) => `<button aria-pressed="${k === def}" data-r="${k}">${k}</button>`).join("")}</div>`;
 const benchBtns = (id) => `<div class="seg bench" id="${id}"><span class="seg-l">Compare with</span><button aria-pressed="true" data-b="spx">S&amp;P 500</button><button aria-pressed="false" data-b="qqq">Nasdaq-100</button></div>`;
+// one date window for the whole performance page: both range bars and a drag-zoom on the chart set it
+const PERF = { r: "5Y", zoom: null, subs: [] };
+function perfSet(o) {
+  Object.assign(PERF, o);
+  document.querySelectorAll("#ranges button, #kn-ranges button").forEach((b) => b.setAttribute("aria-pressed", !PERF.zoom && b.dataset.r === PERF.r));
+  document.querySelectorAll(".zoom-reset").forEach((b) => (b.hidden = !PERF.zoom));
+  PERF.subs.forEach((f) => f());
+}
 function renderPerformance(root) {
   root.innerHTML = `
   <div class="record perf-top">
@@ -447,7 +466,7 @@ function renderPerformance(root) {
   </div>
   <div class="record keynums">
     <div class="bar-head"><h2 class="h2">Key numbers</h2>${benchBtns("kn-seg")}</div>
-    <div class="range-bar">${rangeBtns("kn-ranges", "5Y")}</div>
+    <div class="range-bar">${rangeBtns("kn-ranges", "5Y")}<button class="zoom-reset" id="kn-zoom-reset" hidden>Reset zoom</button></div>
     <div class="scroll" id="keynums" style="margin-top:18px"></div>
   </div>
   <div class="record" style="margin-top:56px">
@@ -459,16 +478,20 @@ function renderPerformance(root) {
   keySection();
 }
 async function keySection() {
-  const D = await fullDaily(), st = { r: "5Y" };
+  const D = await fullDaily(), st = PERF;
   const draw = () => {
-    const i0 = st.r === "ALL" ? 0 : windowStart(D.dates, st.r), bs = benchOn("#kn-seg");
-    const d = D.dates.slice(i0 + 1), cols = [{ name: "Portfolio", r: D.model.slice(i0 + 1) }].concat(bs.map((b) => ({ name: BENCH[b][0], r: D[b].slice(i0 + 1) })));
+    // same window as the chart above: the zoomed dates if the chart is zoomed, otherwise the chosen range
+    let i0 = st.r === "ALL" ? 0 : windowStart(D.dates, st.r), i1 = D.dates.length;
+    if (st.zoom) { i0 = Math.max(0, D.dates.indexOf(st.zoom[0]) - 1); i1 = D.dates.indexOf(st.zoom[1]) + 1; }
+    const bs = benchOn("#kn-seg"), sl = (a) => a.slice(i0 + 1, i1);
+    const d = sl(D.dates), cols = [{ name: "Portfolio", r: sl(D.model) }].concat(bs.map((b) => ({ name: BENCH[b][0], r: sl(D[b]) })));
     document.getElementById("keynums").innerHTML = keyTable(d, cols);
   };
   draw();
+  PERF.subs.push(draw);
   document.querySelectorAll("#kn-seg button").forEach((bt) => bt.addEventListener("click", () => { bt.setAttribute("aria-pressed", bt.getAttribute("aria-pressed") !== "true"); draw(); }));
   document.querySelectorAll("#kn-ranges button").forEach((bt) => bt.addEventListener("click", () => {
-    document.querySelectorAll("#kn-ranges button").forEach((o) => o.setAttribute("aria-pressed", o === bt)); st.r = bt.dataset.r; draw();
+    perfSet({ r: bt.dataset.r, zoom: null });
   }));
   // year by year: return and max drawdown within each calendar year, for the portfolio and each benchmark switched on
   const Y = {}, F = ["model", "spx", "qqq"];
@@ -498,7 +521,7 @@ const EXAMPLES = [
   { lead: "contrarian", kind: "Crashes", name: "Crashes", eg: "the 2008 great financial crisis", from: "2008-10-01", to: "2008-12-31",
     text: "In a crash, forced and fearful selling drives even great companies far below fair value, and these are the moments the Contrarian strategy waits for. As banks failed in late 2008, the Core strategy had already sold almost everything. Contrarian selectively made purchases, at times with over 70% of the portfolio, and sold within days as prices rebounded, making over 20% while the S&P 500 fell 22%." },
 ];
-async function renderExamples(root) {
+async function renderExamples(root, texts = {}) {
   const D = await fullDaily(["core", "contrarian", "compass"]);
   const B = [["core", "Core", "--wave"], ["contrarian", "Contrarian", "--opp"], ["compass", "Compass", "--kairos"]];
   const E = EXAMPLES.map((x) => {
@@ -511,7 +534,7 @@ async function renderExamples(root) {
       g *= 1 + D.model[i] / 100; s *= 1 + D.spx[i] / 100;
       dates.push(D.dates[i]); L.model.push((g - 1) * 100); L.spx.push((s - 1) * 100); B.forEach(([k]) => L[k].push(c[k] * 100));
     }
-    return { ...x, d0: D.dates[i0], d1: D.dates[i1], dates, L, port: (g - 1) * 100, spx: (s - 1) * 100, c: Object.fromEntries(B.map(([k]) => [k, c[k] * 100])) };
+    return { ...x, text: texts[x.lead] || x.text, d0: D.dates[i0], d1: D.dates[i1], dates, L, port: (g - 1) * 100, spx: (s - 1) * 100, c: Object.fromEntries(B.map(([k]) => [k, c[k] * 100])) };
   });
   const top = Math.max(...E.flatMap((e) => B.map(([k]) => Math.abs(e.c[k]))));      // one scale for all three
   root.innerHTML = E.map((e, j) => { const [, ln, lc] = B.find(([k]) => k === e.lead);
@@ -531,6 +554,107 @@ async function renderExamples(root) {
         ...B.map(([k, n, col]) => ({ name: n, endLabel: n, v: e.L[k], color: css(col), w: 2, tipFmt: f })),
         { name: "Portfolio", endLabel: "Portfolio", v: e.L.model, color: css("--ink"), w: 3, tipFmt: f }] },
     ], { padRight: 110, dayTicks: e.dates.length < 80, label: `${e.name}: portfolio, S&P 500 and each strategy's share of the return` }); });
+}
+
+/* ---------- professional pages (/pro/): same charts, plus the research numbers in data/pro.json ---------- */
+const num = (x, dp = 2) => x == null ? "–" : (+x.toFixed(dp) === 0 ? 0 : x).toFixed(dp).replace("-", "−");   // no "−0.00"
+
+/* pro home: a short table of the numbers that show what the portfolio does for an equity investor, portfolio vs S&P 500 */
+const EDGE_TERMS = {
+  "Upside capture": "In months the S&P 500 rose, the portfolio's average monthly return as a share of the S&P 500's.",
+  "Downside capture": "In months the S&P 500 fell, the portfolio's average monthly return as a share of the S&P 500's. Below 0% means it made money on average when the market fell.",
+  "Up-market beta": "Beta measured only on days the S&P 500 rose: how much of the market's gains it took part in.",
+  "Down-market beta": "Beta measured only on days the S&P 500 fell: how much of the market's losses it took part in.",
+  "Monthly beta": "How much monthly returns move with the S&P 500. 1 = in step, 0 = unrelated.",
+  "Return in down months": "Average monthly return in months the S&P 500 fell.",
+  "Up in down months": "Share of the S&P 500's down months in which the portfolio made money.",
+  "Worst calendar year": "Lowest return in any calendar year since 2000.",
+  "Max drawdown": "Largest fall from a previous high to a low.",
+};
+function edgeTable(D) {
+  const a = D.model.map((x) => x / 100), b = D.spx.map((x) => x / 100);
+  const beta = (ix) => { const x = ix.map((i) => b[i]), y = ix.map((i) => a[i]), mx = x.reduce((s, v) => s + v, 0) / x.length, my = y.reduce((s, v) => s + v, 0) / y.length;
+    let c = 0, v = 0; x.forEach((xi, k) => { c += (xi - mx) * (y[k] - my); v += (xi - mx) ** 2; }); return c / v; };
+  const all = a.map((_, i) => i), up = all.filter((i) => b[i] > 0), dn = all.filter((i) => b[i] < 0);
+  const M = {}; D.dates.forEach((d, i) => { const k = d.slice(0, 7), o = (M[k] = M[k] || [1, 1]); o[0] *= 1 + a[i]; o[1] *= 1 + b[i]; });
+  const am = Object.values(M).map((o) => o[0] - 1), bm = Object.values(M).map((o) => o[1] - 1);
+  const mbeta = (() => { const mx = bm.reduce((s, v) => s + v, 0) / bm.length, my = am.reduce((s, v) => s + v, 0) / am.length; let c = 0, v = 0; bm.forEach((x, i) => { c += (x - mx) * (am[i] - my); v += (x - mx) ** 2; }); return c / v; })();
+  const geo = (xs) => xs.reduce((s, x) => s * (1 + x), 1) ** (1 / xs.length) - 1;
+  const ui = bm.map((x, i) => (x > 0 ? i : -1)).filter((i) => i >= 0), di = bm.map((x, i) => (x < 0 ? i : -1)).filter((i) => i >= 0);
+  const cap = (ix) => geo(ix.map((i) => am[i])) / geo(ix.map((i) => bm[i]));
+  const dd = (r) => { let g = 1, pk = 1, m = 0; r.forEach((x) => { g *= 1 + x; pk = Math.max(pk, g); m = Math.min(m, g / pk - 1); }); return m; };
+  const Y = {}; D.dates.forEach((d, i) => { const y = d.slice(0, 4), o = (Y[y] = Y[y] || [1, 1]); o[0] *= 1 + a[i]; o[1] *= 1 + b[i]; });
+  const ys = Object.values(Y), P = (x, dp = 0) => pct(x * 100, dp), N = (x) => num(x);
+  const rows = [
+    ["Upside capture", `${Math.round(cap(ui) * 100)}%`, "100%"],
+    ["Downside capture", `${Math.round(cap(di) * 100)}%`.replace("-", "−"), "100%"],
+    ["Up-market beta", N(beta(up)), "1.00"],
+    ["Down-market beta", N(beta(dn)), "1.00"],
+    ["Monthly beta", N(mbeta), "1.00"],
+    ["Return in down months", P(di.reduce((s, i) => s + am[i], 0) / di.length, 1), P(di.reduce((s, i) => s + bm[i], 0) / di.length, 1)],
+    ["Up in down months", `${Math.round(di.filter((i) => am[i] > 0).length / di.length * 100)}%`, "0%"],
+    ["Worst calendar year", P(Math.min(...ys.map((o) => o[0] - 1)), 1), P(Math.min(...ys.map((o) => o[1] - 1)), 1)],
+    ["Max drawdown", P(dd(a), 1), P(dd(b), 1)],
+  ];
+  return `<table class="quant edge-t">${rows.map(([l, v]) => `<tr><td class="l" title="${EDGE_TERMS[l]}">${l}</td><td><b>${v}</b></td></tr>`).join("")}</table>`;
+}
+async function proLanding(D, h, years) {
+  const J = await loadJSON("data/pro.json"), F = J.periods.full, p = F.portfolio, s = F.spx, yrs = `${p.start.slice(0, 4)}–${p.end.slice(0, 4)}`;
+  document.getElementById("stats").innerHTML = [
+    [pct(p.cagr, 1, false), "CAGR", `S&amp;P 500 ${pct(s.cagr, 1, false)}`],
+    [num(p.sharpe), "Sharpe ratio", `S&amp;P 500 ${num(s.sharpe)}`],
+    [pct(p.maxdd, 0), "max drawdown", `S&amp;P 500 ${pct(s.maxdd, 0)}`],
+    [num(p.beta_spx_m), "monthly beta to S&amp;P 500", `correlation ${num(p.corr_spx_m)}`],
+  ].map(([v, lab, b]) => `<div><div class="v">${v}</div><div class="l">${lab}</div><div class="b">${b}</div></div>`).join("");
+  const f = J.factors.full.portfolio.weekly;
+  const et = document.getElementById("edge");
+  if (et) et.innerHTML = edgeTable(D);
+  const el = document.getElementById("alpha-txt");
+  if (el) el.textContent = `${f.alpha.toFixed(0)}% a year (t ${f.t_alpha.toFixed(1)}) after controlling for the Fama-French, momentum, reversal and betting-against-beta factors, which explain under a fifth of returns.`;
+  document.getElementById("books").innerHTML = bookCards({
+    Core: "Owns strong, high-quality stocks that are likely to outperform. Highly selective, yet diversified: up to 50 positions, spread across sectors. It builds exposure early in bull markets, stepping aside when volatility returns.",
+    Contrarian: "Buys leading large caps into capitulation, after forced and emotional selling has driven prices sharply lower. Positions are scaled into and exited quickly, held for days, not months. In effect it is paid to provide liquidity when others need it most, and it is busiest when Core is stepping aside.",
+    Compass: "Reads market breadth, volatility, sentiment and trend every day to form a directional view. Without a strong signal, it uses index futures to hedge Core and Contrarian to market-neutral. When conviction is high, it takes the whole portfolio net long or net short, up to 100% either way.",
+  }, { Core: "Volatility-managed trend", Contrarian: "Short-term mean reversion", Compass: "Market timing" });
+}
+
+function renderProStats(root) {
+  loadJSON("data/pro.json").then((J) => {
+    const F = J.periods.full, A = J.factors.full, c = J.corr.full, T = J.turnover;
+    const long = (d) => day(d, { day: "numeric", month: "long", year: "numeric" }), span = `${long(F.portfolio.start)} to ${long(F.portfolio.end)}`;
+    const rows = [["CAGR", "cagr", (x) => pct(x, 1)], ["Volatility", "vol", (x) => pct(x, 1, false)], ["Sharpe ratio (rf = 0)", "sharpe", num],
+      ["Sortino ratio", "sortino", num], ["Max drawdown", "maxdd", (x) => pct(x, 1)], ["Calmar ratio", "calmar", num],
+      ["Longest drawdown (trading days)", "longest_dd", (x) => String(x)], ["Worst month", "worst_month", (x) => pct(x, 1)], ["Positive months", "pos_months", (x) => pct(x, 0, false)],
+      ["Worst calendar year", "worst_year", (x) => pct(x, 1)], ["Beta to S&amp;P 500, monthly", "beta_spx_m", num], ["Beta to S&amp;P 500, daily", "beta_spx", num],
+      ["Daily beta on S&amp;P 500 up days", "beta_up", num], ["Daily beta on S&amp;P 500 down days", "beta_down", num], ["Correlation to S&amp;P 500, monthly", "corr_spx_m", num],
+      ["Correlation to S&amp;P 500, daily", "corr_spx", num], ["Beta to Nasdaq-100, daily", "beta_ndx", num], ["Correlation to Nasdaq-100, daily", "corr_ndx", num]];
+    const self = ["beta_spx", "corr_spx", "beta_up", "beta_down", "beta_spx_m", "corr_spx_m"];     // the S&P against itself: always 1
+    const risk = `<table class="quant split-t"><tr><th class="l"></th><th>Portfolio</th><th>S&amp;P 500</th></tr>
+      ${rows.map(([lab, k, fm]) => `<tr><td class="l">${lab}</td><td><b>${fm(F.portfolio[k])}</b></td><td>${self.includes(k) ? "–" : fm(F.spx[k])}</td></tr>`).join("")}</table>`;
+    const bps = [...new Set(J.costs.map((x) => x.stock_bp))], nqs = [...new Set(J.costs.map((x) => x.nq_bp))];
+    const cell = (s, n) => { const x = J.costs.find((y) => y.stock_bp === s && y.nq_bp === n).full; return `<td${s === 5 && n === 2 ? ' class="base"' : ""}>${pct(x.cagr, 1, false)} · ${num(x.sharpe)}</td>`; };
+    const costs = `<h3 class="sub-h">CAGR · Sharpe ratio, ${F.portfolio.start.slice(0, 4)}–${F.portfolio.end.slice(0, 4)}</h3><table class="quant cost-t"><tr><th class="l">Stocks, per side</th>${nqs.map((n) => `<th>Futures ${n} bp</th>`).join("")}</tr>
+      ${bps.map((s) => `<tr><td class="l">${s} bp</td>${nqs.map((n) => cell(s, n)).join("")}</tr>`).join("")}</table>`;
+    const FAC = [["Mkt-RF", "Market"], ["SMB", "Size"], ["HML", "Value"], ["RMW", "Profitability"], ["CMA", "Investment"], ["MOM", "Momentum"], ["STREV", "Short-term reversal"], ["BAB", "Betting against beta"]];
+    const who = [["portfolio", "Portfolio"], ["core", "Core"], ["contrarian", "Contrarian"], ["compass", "Compass"]];
+    const weak = (t) => Math.abs(t) < 2 ? ' class="weak"' : "";      // estimates with |t| < 2 are faded: not distinguishable from zero
+    const fx = (v) => `<span${weak(v.t)}>${num(v.b)}<span class="t">t ${num(v.t, 1)}</span></span>`;
+    const fac = `<h3 class="sub-h">${A.portfolio.start.slice(0, 4)} to ${day(A.portfolio.end, { month: "long", year: "numeric" })}</h3><table class="quant fac-t"><tr><th class="l"></th>${who.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+      <tr><td class="l">Alpha a year</td>${who.map(([k]) => `<td><span${weak(A[k].weekly.t_alpha)}><b>${pct(A[k].weekly.alpha, 1)}</b><span class="t">t ${num(A[k].weekly.t_alpha, 1)}</span></span></td>`).join("")}</tr>
+      ${FAC.map(([k, n]) => `<tr><td class="l">${n}</td>${who.map(([w]) => `<td>${fx(A[w].weekly[k])}</td>`).join("")}</tr>`).join("")}
+      <tr><td class="l">R²</td>${who.map(([k]) => `<td>${num(A[k].weekly.r2)}</td>`).join("")}</tr></table>`;
+    root.innerHTML = `
+    <section class="lp-sec"><p class="kicker">Risk statistics</p><h2 class="h2">The full record</h2>
+      <div class="scroll">${risk}</div>
+      <p class="note">Daily returns, ${span}, after trading costs, before any interest on idle cash. Futures are financed at the 3-month T-bill rate. S&amp;P 500 is the total-return index.</p></section>
+    <section class="lp-sec"><p class="kicker">Trading costs</p><h2 class="h2">Cost sensitivity</h2>
+      <p class="lede pm-lede">The base case (highlighted) charges 5 bp per side on stocks, plus $0.005 a share on Contrarian trades, and 2 bp per side on futures. Average gross exposure is ${(T.avg_gross * 100).toFixed(0)}% and the futures position turns over about ${T.nq_per_year.toFixed(0)} times its capital a year, so the futures cost matters more than the stock cost.</p>
+      <div class="scroll">${costs}</div></section>
+    <section class="lp-sec"><p class="kicker">Factor exposure</p><h2 class="h2">What explains the returns</h2>
+      <p class="lede pm-lede">Weekly regressions on the Fama-French five factors, momentum and short-term reversal (Ken French data library) and betting-against-beta (AQR), with each estimate's t-statistic underneath in grey (Newey-West). Estimates with a t-statistic below 2, which cannot be told apart from zero, are faded. Strategy columns use each strategy's contribution to the whole account, so their loadings add up to the portfolio's. Returns are not net of the risk-free rate, so alpha is before any interest on cash.</p>
+      <div class="scroll">${fac}</div>
+      <p class="note">Daily correlation of the strategies' contributions: Core and Contrarian ${num(c.core_contrarian)}, Contrarian and Compass ${num(c.contrarian_compass)}, Core and Compass ${num(c.core_compass)} (Compass hedges Core).</p></section>`;
+  }).catch(() => { root.innerHTML = ""; });
 }
 
 /* ---------- header: always shown on desktop; on phones it hides while scrolling down ---------- */

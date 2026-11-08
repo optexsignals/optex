@@ -1,6 +1,7 @@
 # optexmodel.com           = OPTEX Market Timing Model (root; the professional version since 2026-11-07)
 # optexmodel.com/r         = OPTEX Market Timing Model, retail version
-# optexmodel.com/allweather = OPTEX all-weather stock portfolio (moved here 2026-11; was the root)
+# optexmodel.com/allweather   = OPTEX all-weather stock portfolio, professional version (since 2026-11-08)
+# optexmodel.com/allweather/r = OPTEX all-weather stock portfolio, retail version
 [build]
   publish = "."
 
@@ -61,5 +62,10 @@
 
 [[redirects]]
   from = "/pro/*"
-  to = "/allweather/pro/:splat"
+  to = "/allweather/:splat"
+  status = 301
+
+[[redirects]]
+  from = "/allweather/pro/*"
+  to = "/allweather/:splat"
   status = 301
