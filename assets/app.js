@@ -174,7 +174,7 @@ function timeChart(host, dates, panels, opts = {}) {
   if (phone) panels.forEach((p) => (p.h = Math.round(p.h * 0.7)));
   const W = phone ? cw : 1000, x0 = phone ? 36 : 40, x1 = W - 4 - (opts.padRight || 0) * (phone ? 0.7 : 1), gap = 18;
   // opts.axisAfter: put the date axis under that panel (e.g. 0 = under the price chart) with room before the next one
-  const ax = opts.axisAfter, gp = panels.map((_, i) => (i === ax ? 50 : gap)), th = panels.map((p) => (p.title ? 24 : 0));
+  const ax = opts.axisAfter, gp = panels.map((_, i) => (i === ax ? 50 : gap)), th = panels.map((p) => (p.title ? (phone && p.legend ? 44 : 24) : 0));
   const H = panels.reduce((a, p, i) => a + p.h + th[i], 0) + gp.slice(0, -1).reduce((a, g) => a + g, 0) + (ax != null && ax < panels.length - 1 ? 6 : 22);
   const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.label || "chart" });
   const n = dates.length, X = (i) => x0 + (i / (n - 1)) * (x1 - x0), ink = css("--ink"), faint = "rgba(27,26,23,.14)";
@@ -197,10 +197,16 @@ function timeChart(host, dates, panels, opts = {}) {
     if (p.log) { for (let k = Math.floor(lo); k <= hi; k++) (p.logMult || [1, 2, 5]).forEach((m) => { const v = k + Math.log10(m); if (v >= lo && v <= hi) ticks.push(v); }); }
     else { const st = p.tickStep || niceStep((hi - lo) / 3); for (let v = Math.ceil(lo / st) * st; v <= hi + 1e-9; v += st) ticks.push(v); }
     if (p.title) { const tt = svg("text", { x: x0, y: top + 13, style: `fill:${ink};font-weight:600;font-size:13px` }); tt.textContent = p.title; s.appendChild(tt); }
-    if (p.title && p.legend) {   // [[symbol, colour, label], ...] right-aligned on the title row
-      const lg = svg("text", { x: x1, y: top + 13, "text-anchor": "end", style: "font-size:12px" });
-      p.legend.forEach(([sym, col, lab], k) => { const a = svg("tspan", { style: `fill:${col}` }); a.textContent = (k ? " " : "") + sym + " "; const b = svg("tspan"); b.textContent = phone ? lab.replace(/^Exposure (\w)/, (_, c) => c.toUpperCase()) : lab; lg.appendChild(a); lg.appendChild(b); });
-      s.appendChild(lg);
+    if (p.title && p.legend) {   // [[symbol | "line", colour, label], ...] after the title; on phones on its own row underneath
+      let lx = phone ? x0 : x0 + p.title.length * 7.6 + 22;
+      const ly = phone ? top + 33 : top + 13;
+      p.legend.forEach(([sym, col, lab]) => {
+        if (sym === "line") { s.appendChild(svg("line", { x1: lx, x2: lx + 16, y1: ly - 4, y2: ly - 4, stroke: col, "stroke-width": 2.5 })); lx += 21; }
+        else { const a = svg("text", { x: lx, y: ly, style: `fill:${col};font-size:12px` }); a.textContent = sym; s.appendChild(a); lx += 14; }
+        const t = phone ? lab.replace(/^Exposure (\w)/, (_, c) => c.toUpperCase()) : lab;
+        const b = svg("text", { x: lx, y: ly, style: "font-size:12px" }); b.textContent = t; s.appendChild(b);
+        lx += t.length * 6.3 + 16;
+      });
     }
     ticks.forEach((v) => {
       const z = Math.abs(v) < 1e-9 && p.zero;
@@ -212,13 +218,14 @@ function timeChart(host, dates, panels, opts = {}) {
       se.v.forEach((v, i) => { if (v == null) { on = false; return; } const x = X(i), y = Y(v); d += se.step && on ? `H${x}V${y}` : (on ? "L" : "M") + x + "," + y; on = true; });
       if (se.area) s.appendChild(svg("path", { d: d + `V${Y(0)}H${X(0)}Z`, fill: se.color, opacity: 0.18 }));
       if (se.wash) s.appendChild(svg("path", { d: d + `V${t0 + p.h}H${X(0)}Z`, fill: se.color, opacity: se.wash }));   // soft fill down to the panel floor
-      s.appendChild(svg("path", { d, fill: "none", stroke: se.color, "stroke-width": se.w || 2, "stroke-linejoin": "round" }));
+      if (se.halo) s.appendChild(svg("path", { d, fill: "none", stroke: css("--paper"), "stroke-width": (se.w || 2) + 3, "stroke-linejoin": "round" }));   // white edge so the line stands clear
+      s.appendChild(svg("path", { d, fill: "none", stroke: se.color, "stroke-width": se.w || 2, "stroke-linejoin": "round", "stroke-opacity": se.opacity || 1 }));
+      (se.marks || []).forEach(({ i, up, color }) => {
+        const v = se.v[i]; if (v == null) return;
+        const x = X(i), y = Y(v), r = Math.max(2, Math.min(phone ? 4 : 5, ((x1 - x0) / n) * 1.6));
+        s.appendChild(svg("path", { d: up ? `M${x},${y - r}L${x + r},${y + r * 0.8}L${x - r},${y + r * 0.8}Z` : `M${x},${y + r}L${x + r},${y - r * 0.8}L${x - r},${y - r * 0.8}Z`, fill: color }));
+      });
     });
-    p.series.forEach((se) => (se.marks || []).forEach(({ i, up, color }) => {
-      const v = se.v[i]; if (v == null) return;
-      const x = X(i), y = Y(v), r = phone ? 4.5 : 5.5;
-      s.appendChild(svg("path", { d: up ? `M${x},${y - r}L${x + r},${y + r * 0.8}L${x - r},${y + r * 0.8}Z` : `M${x},${y + r}L${x + r},${y - r * 0.8}L${x - r},${y - r * 0.8}Z`, fill: color }));
-    }));
     const ends = p.series.filter((se) => se.endLabel).map((se) => ({ se, y: Y(se.v[se.v.length - 1]) })).sort((a, b) => a.y - b.y);
     const ls = opts.labelSize || 15;
     ends.forEach((o, i) => { if (i && o.y - ends[i - 1].y < ls * 1.2) o.y = ends[i - 1].y + ls * 1.2; });
@@ -301,7 +308,8 @@ function calendarYears(D) {
 const rangeBtns = (id, def) => `<div class="seg ranges" id="${id}">${RANGES.map(([k]) => `<button aria-pressed="${k === def}" data-r="${k}"${k === "X" ? ' class="xr"' : ""}>${RANGE_LABEL[k] || k}</button>`).join("")}</div>`;
 const benchBtns = (id) => `<div class="seg bench" id="${id}"><span class="seg-l">Compare with</span><button aria-pressed="true" data-b="qqq">QQQ</button><button aria-pressed="false" data-b="spx">S&amp;P 500</button></div>`;
 // one date window for the whole performance page: both range bars and a drag-zoom on the chart set it
-const PERF = { r: "X", zoom: null, subs: [] };
+// arrows: trade arrows on the benchmark line, on by default (Steve 2026-11-08); the toggle's choice holds across windows
+const PERF = { r: "X", zoom: null, arrows: true, optex: true, subs: [] };   // optex: the OPTEX line can be hidden to look at the trades on QQQ
 function perfSet(o) {
   Object.assign(PERF, o);
   document.querySelectorAll("#ranges button, #kn-ranges button").forEach((b) => b.setAttribute("aria-pressed", !PERF.zoom && b.dataset.r === PERF.r));
@@ -431,16 +439,20 @@ async function record() {
     document.getElementById("row").innerHTML = cell(`Return, ${span}`, ret(m), ret) + (ann(m) != null ? cell("Per year", ann(m), ann) : "");
     const yrs = dates.length / 252, log = yrs > 4, lw = yrs > 4 ? 0.5 : 1.4, pf = (v) => pct(v, 1);
     const pos = sl(D.net_close ? "net_close" : "net"), wave = css("--wave");
-    // 6 months or less on screen: arrows where the exposure set at the close went up or down, like the daily email
-    const short = (new Date(dates[dates.length - 1]) - new Date(dates[0])) / 864e5 <= 190;
-    const marks = short ? pos.flatMap((v, i) => (i && Math.abs(v - pos[i - 1]) > 0.5 ? [{ i, up: v > pos[i - 1], color: v > pos[i - 1] ? wave : ink0 }] : [])) : [];
+    // arrows where the exposure set at the close went up or down, like the daily email
+    const on = (st.arrowsOn = st.arrows);
+    document.querySelectorAll(".arrows-tg").forEach((b) => b.setAttribute("aria-pressed", on));
+    const marks = on ? pos.flatMap((v, i) => (i && Math.abs(v - pos[i - 1]) > 0.5 ? [{ i, up: v > pos[i - 1], color: v > pos[i - 1] ? wave : ink0 }] : [])) : [];
     const onB = bms.find((x) => x.key === "qqq") || bms[0];   // arrows on QQQ, or the S&P 500 when QQQ is hidden; never on the OPTEX line
+    const showM = st.optex || !bms.length;                     // with no benchmark on, OPTEX stays
+    document.querySelectorAll(".optex-tg").forEach((b) => b.setAttribute("aria-pressed", showM));
+    const bw = showM ? 1.3 : 1.8, bo = showM ? 0.8 : 1;
     timeChart(host, dates, [
-      { h: Math.round(340 * k), log, title: "Growth of 100", legend: marks.length && onB ? [["▲", wave, "Exposure increased"], ["▼", ink0, "Exposure reduced"]] : null,
-        fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: 1.5, marks: x === onB ? marks : null, tipFmt: (v) => pct(v - 100, 1) })).concat([
-        { name: NAME, v: m, color: wave, w: 2.4, tipFmt: (v) => pct(v - 100, 1) }]) },
-      { h: Math.round(130 * k), title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat([
-        { name: NAME + " drawdown", v: ddOf(m), color: css("--wave"), w: 1.6, area: true, tipFmt: pf }]) },
+      { h: Math.round(340 * k), log, title: "Growth of 100", legend: (showM ? [["line", wave, NAME]] : []).concat(bms.map((x) => ["line", x.color, x.name]), marks.length && onB ? [["▲", wave, "Exposure increased"], ["▼", ink0, "Exposure reduced"]] : []),
+        fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: bw, opacity: bo, marks: x === onB ? marks : null, tipFmt: (v) => pct(v - 100, 1) })).concat(showM ? [
+        { name: NAME, v: m, color: wave, w: 3, halo: true, tipFmt: (v) => pct(v - 100, 1) }] : []) },
+      { h: Math.round(130 * k), title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat(showM ? [
+        { name: NAME + " drawdown", v: ddOf(m), color: css("--wave"), w: 1.8, area: true, tipFmt: pf }] : []) },
       { h: Math.round(190 * k), title: "Exposure, % of account equity", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, min: LO ? 0 : -100, max: 150, tickStep: 50, series: [
         { name: "Exposure", v: sl(D.net_close ? "net_close" : "net"), color: css("--wave"), w: lw * 1.6, step: true, area: true, tipFmt: (v) => pct(v) }] },
     ], { yearTicks: yrs > 2.5, yearEvery: yrs > 14 ? 4 : yrs > 7 ? 2 : 1, dayTicks: dates.length <= 30, axisAfter: 1, label: [NAME].concat(bms.map((x) => x.name)).join(" vs "),
@@ -459,6 +471,8 @@ async function record() {
   addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closeFull(); });
   let rz; addEventListener("resize", () => { if (modal.hidden) return; clearTimeout(rz); rz = setTimeout(draw, 150); });
   document.querySelectorAll(".zoom-reset").forEach((b) => b.addEventListener("click", () => perfSet({ zoom: null })));
+  document.querySelectorAll(".arrows-tg").forEach((b) => b.addEventListener("click", () => perfSet({ arrows: !PERF.arrowsOn })));
+  document.querySelectorAll(".optex-tg").forEach((b) => b.addEventListener("click", () => perfSet({ optex: b.getAttribute("aria-pressed") !== "true" })));
   document.querySelectorAll("#seg button").forEach((bt) => bt.addEventListener("click", () => {
     bt.setAttribute("aria-pressed", bt.getAttribute("aria-pressed") !== "true"); st.bs = benchOn("#seg"); draw();
   }));
@@ -468,7 +482,7 @@ async function record() {
 function renderPerformance(root) {
   root.innerHTML = `
   <div class="record perf-top">
-    <div class="bar-head"><h1 class="h2 perf-h1">Performance</h1><div class="bar-tools">${modeBar()}${benchBtns("seg")}</div></div>
+    <div class="bar-head"><h1 class="h2 perf-h1">Performance</h1><div class="bar-tools">${modeBar()}${benchBtns("seg")}<div class="seg bench"><span class="seg-l">Show</span><button class="optex-tg" aria-pressed="true">OPTEX</button><button class="arrows-tg" aria-pressed="false" title="Arrows where the exposure was increased or reduced">▲▼ Trades</button></div></div></div>
     <p class="note x-note">${LO ? `Long only: the version shared live on ${xLink("X")} since ${sharedLong()}, with every short signal held in cash.` : `Long/short: the full model. Its long-only version has been shared live on ${xLink("X")} since ${sharedLong()}.`}</p>
     <div class="range-bar">${rangeBtns("ranges", "X")}
       <span class="zoom-hint">Drag across the chart to zoom in</span><button class="zoom-reset" id="zoom-reset" hidden>Reset zoom</button><button class="chart-expand" id="chart-expand">⤢ Full screen</button></div>
@@ -476,7 +490,7 @@ function renderPerformance(root) {
     <div class="chart chart-click" id="chart"></div>
   </div>
   <div class="chart-modal" id="chart-modal" hidden><div class="cm-box">
-    <div class="cm-bar"><span class="cm-title">${NAME} vs QQQ</span><span class="zoom-hint">Drag across the chart to zoom in</span><button class="zoom-reset" hidden>Reset zoom</button><button class="cm-close" aria-label="Close">✕</button></div>
+    <div class="cm-bar"><span class="cm-title">${NAME} vs QQQ</span><span class="zoom-hint">Drag across the chart to zoom in</span><button class="zoom-reset" hidden>Reset zoom</button><button class="optex-tg" aria-pressed="true">OPTEX</button><button class="arrows-tg" aria-pressed="false">▲▼ Trades</button><button class="cm-close" aria-label="Close">✕</button></div>
     <p class="cm-rotate">Turn your phone sideways for a bigger chart.</p>
     <div class="chart" id="chart-full"></div>
   </div></div>
@@ -490,7 +504,7 @@ function renderPerformance(root) {
     <div class="scroll" id="years" style="margin-top:18px"></div>
   </div>
   <p class="note" id="costs-note"></p>
-  <p class="more" style="margin-top:44px"><a href="archive.html">Archive →</a> &nbsp; <a href="${BASE}data/optex_history.csv" download>Download the full history since 2000 (CSV)</a></p>`;
+  <p class="more" style="margin-top:44px"><a href="${BASE}data/optex_history.csv" download>Download the full position history (CSV)</a></p>`;
   record();
   keySection();
   if (!PRO) document.getElementById("costs-note").textContent = "Returns are QQQ's total return, dividends included, times the position held, with no trading costs, borrowing costs or interest on cash. The S&P 500 includes dividends.";
@@ -540,24 +554,30 @@ function renderProStats(root) {
       <tr><td class="l">Sharpe ratio of the contribution</td>${["lt", "st", "short"].map((k) => `<td>${num(J.strategies[k].full.sharpe)}</td>`).join("")}</tr></table>`;
 
 
-    const A = J.factors.full;
-    const FAC = [["Mkt-RF", "Market"], ["SMB", "Size"], ["HML", "Value"], ["RMW", "Profitability"], ["CMA", "Investment"], ["MOM", "Momentum"], ["STREV", "Short-term reversal"], ["BAB", "Betting against beta"]];
-    const who = [["model", "Model"], ["lt", "Long-term"], ["st", "Tactical"], ["short", "Short"], ["qqq", "QQQ"]];
-    const weak = (t) => Math.abs(t) < 2 ? ' class="weak"' : "";
-    const fx = (o) => `<span${weak(o.t)}>${num(o.b)}<span class="t">t ${num(o.t, 1)}</span></span>`;
-    const fac = `<table class="quant fac-t"><tr><th class="l"></th>${who.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
-      <tr><td class="l">Alpha a year</td>${who.map(([k]) => `<td><span${weak(A[k].weekly.t_alpha)}><b>${pct(A[k].weekly.alpha, 1)}</b><span class="t">t ${num(A[k].weekly.t_alpha, 1)}</span></span></td>`).join("")}</tr>
-      ${FAC.map(([k, n]) => `<tr><td class="l">${n}</td>${who.map(([w]) => `<td>${fx(A[w].weekly[k])}</td>`).join("")}</tr>`).join("")}
-      <tr><td class="l">R²</td>${who.map(([k]) => `<td>${num(A[k].weekly.r2)}</td>`).join("")}</tr></table>`;
+    // timing tests (daily, Newey-West): replaces the factor table; the factor result is one line here
+    const T = J.timing && J.timing.full, A = J.factors.full, tc = [["model", "Long/short"], ["model_lo", "Long only"]];
+    const tv = (b, t, f = num) => `${f(b)}<span class="t">t ${num(t, 1)}</span>`;
+    const fa = (k) => (A[k] ? tv(A[k].weekly.alpha, A[k].weekly.t_alpha, (x) => pct(x, 1)) : "–");
+    const timing = !T ? "" : `<table class="quant fac-t tim-t"><tr><th class="l"></th>${tc.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+      <tr><td class="l" title="Coefficient on QQQ's squared return in a regression of the model's daily return on QQQ's return and its square. A significantly positive value indicates convexity: exposure rises ahead of up moves and falls ahead of down moves, a return profile similar to a long option position.">Treynor–Mazuy timing coefficient</td>${tc.map(([k]) => `<td><b>${tv(T[k].tm_gamma, T[k].tm_t)}</b></td>`).join("")}</tr>
+      <tr><td class="l" title="Separate betas for days QQQ rises and days it falls. Higher beta on up days than on down days is market timing; the t-statistic is for the difference between the two.">Beta on QQQ up days (Henriksson–Merton)</td>${tc.map(([k]) => `<td>${tv(T[k].hm_beta_up, T[k].hm_t)}</td>`).join("")}</tr>
+      <tr><td class="l" title="How much of QQQ's move the model takes on days QQQ falls. Near zero means it captures little of the down days.">Beta on QQQ down days</td>${tc.map(([k]) => `<td>${num(T[k].hm_beta_down)}</td>`).join("")}</tr>
+      <tr><td class="l" title="Trend rule: QQQ when above its 200-day average, otherwise cash">Alpha a year after QQQ and a 200-day trend rule</td>${tc.map(([k]) => `<td><b>${tv(T[k].alpha_trend, T[k].alpha_trend_t, (x) => pct(x, 1))}</b></td>`).join("")}</tr>
+      <tr><td class="l" title="Fama-French five, momentum, short-term reversal, betting-against-beta">Alpha a year after eight equity factors</td>${tc.map(([k]) => `<td>${fa(k)}</td>`).join("")}</tr></table>`;
+    const BP = T && T.model.by_position;
+    const bypos = !T ? "" : `<table class="quant split-t"><tr><th class="l">Model position</th><th>Share of days</th><th>QQQ a year*</th></tr>
+      ${[["above_100", "Above 100% long"], ["long", "Long, up to 100%"], ["flat", "Flat"], ["short", "Short"]].map(([k, n]) =>
+        `<tr><td class="l">${n}</td><td>${pct(BP[k].pct_days, 0, false)}</td><td><b class="${tone(BP[k].qqq_ann)}">${pct(BP[k].qqq_ann, 0)}</b></td></tr>`).join("")}</table>
+      <p class="note">* QQQ's average daily return on those days, annualized.</p>`;
 
     root.innerHTML = `
     <section class="lp-sec"><p class="kicker">Risk statistics</p><h2 class="h2">The full record</h2>
       <div class="scroll">${risk}</div></section>
     <section class="lp-sec"><p class="kicker">Exposure</p><h2 class="h2">How the book is positioned</h2>
       <div class="pro-two"><div class="scroll">${expo}</div><div class="scroll">${strat}</div></div></section>
-    <section class="lp-sec"><p class="kicker">Factor exposure</p><h2 class="h2">Market timing, not factor exposure</h2>
-      <p class="lede pm-lede">Regressions on the Fama-French five factors, momentum and short-term reversal (Ken French data library) and betting-against-beta (AQR), with each t-statistic underneath in grey (Newey-West). Estimates with a t-statistic below 2 are faded.</p>
-      <div class="scroll">${fac}</div></section>`;
+    ${!T ? "" : `<section class="lp-sec"><p class="kicker">Timing tests</p><h2 class="h2">In position before the move</h2>
+      <p class="lede pm-lede">QQQ's return by the model's position, and the standard timing tests on daily returns.</p>
+      <div class="pro-two"><div class="scroll">${bypos}</div><div class="scroll">${timing}</div></div></section>`}`;
   }).catch((e) => { console.error(e); root.innerHTML = ""; });
 }
 async function keySection() {

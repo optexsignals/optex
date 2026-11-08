@@ -285,6 +285,7 @@ footer p { margin: 8px 0 0; }
 
 .lp-end { margin-top: 96px; padding: 72px 0; background: var(--wave-tint); border-top: 3px solid var(--wave); }
 .lp-end h2 { margin-bottom: 22px; }
+@media (min-width: 700px) { html[data-site="pro"] .lp-end h2 { white-space: nowrap; max-width: none; } }   /* pro sign-up heading on one line */
 .lp-thanks { padding: 96px 32px 40px; }
 /* hero: copy on top, chart full width beneath */
 .lp-hero .wrap { grid-template-columns: 1fr; gap: 40px; }
@@ -499,6 +500,7 @@ table.quant.split-t, table.quant.fac-t { width: 100%; max-width: none; }
 table.quant.split-t td:not(.l) { width: 15%; }
 table.quant.fac-t td:not(.l) { width: 17%; }
 table.quant.cost-t td:not(.l) { width: 22%; }
+table.quant.tim-t td.l { white-space: normal; } table.quant.tim-t td:not(.l) { width: 21%; }
 table.quant .weak, table.quant .weak b { color: var(--rule-2); font-weight: 400; }
 /* pro hero: longer intro, so give the headline more of the row and a larger size */
 @media (min-width: 901px) {
@@ -648,3 +650,9 @@ table.quant.edge-t td:not(.l) { width: 30%; }
 .cap-v { font: 400 clamp(40px, 4.6vw, 60px)/1 var(--serif); color: var(--wave); letter-spacing: -0.02em; margin-bottom: 10px; }
 html[data-site="pro"] .lp-hero-text .lp-hero-side { justify-self: end; width: 100%; max-width: 460px; }
 .lp-three.cols-2 { grid-template-columns: 1fr 1fr; } @media (max-width: 700px) { .lp-three.cols-2 { grid-template-columns: 1fr; } }
+/* trade-arrows toggle on the performance chart: a one-button segment beside Compare with; in full screen it sits before the ✕ */
+.cm-bar .optex-tg { margin-left: auto; }
+.cm-bar .optex-tg, .cm-bar .arrows-tg { font: 500 13px var(--text); color: var(--ink-2); background: none; border: 1px solid var(--rule-2); border-radius: 4px; padding: 5px 11px; cursor: pointer; white-space: nowrap; }
+.cm-bar .optex-tg[aria-pressed="true"], .cm-bar .arrows-tg[aria-pressed="true"] { color: var(--wave); border-color: var(--wave); }
+.arrows-tg + .cm-close { margin-left: 0; }
+.cm-bar .optex-tg + .arrows-tg { margin-left: -8px; }
