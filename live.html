@@ -91,7 +91,7 @@
     out.innerHTML = `<p class="kicker">${edited ? "Estimate with your prices" : "Estimate from live prices"} · ${r.date}</p>
       <div class="lv-big">${sg(r.position)}</div>
       <p class="lv-sub">${ch === 0 ? `No change from the last close (${sg(r.previous)}, ${r.previous_date})` : `${ch > 0 ? "Up" : "Down"} ${Math.abs(Math.round(ch))} points from ${sg(r.previous)} at the last close (${r.previous_date})`} · QQQ ${r.qqq_change_pct > 0 ? "+" : ""}${r.qqq_change_pct.toFixed(2)}% on the day</p>
-      <p class="lv-parts"><span>Long-term <b>${sg(r.parts.lt)}</b></span><span>Tactical <b>${sg(r.parts.st)}</b></span><span>Short <b>${sg(r.parts.short)}</b></span><span>LT score <b>${r.lt_score}/${r.lt_max}</b></span></p>`;
+      <p class="lv-parts"><span>Long-term <b>${sg(r.parts.lt)}</b></span><span>Tactical <b>${sg(r.parts.st)}</b></span><span>Short <b>${sg(r.parts.short)}</b></span></p>`;
   }
   async function calc() {
     if (busy) { again = true; return; }
