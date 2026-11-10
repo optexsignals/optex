@@ -23,15 +23,15 @@ const SHARED = "2023-10-10";
 const X_URL = "https://x.com/OptexSignals";
 const xLink = (t) => `<a href="${X_URL}" target="_blank" rel="noopener">${t}</a>`;
 const sharedLong = () => day(SHARED, { day: "numeric", month: "long", year: "numeric" });
-/* long/short (the model) or long only (shorts held as cash), chosen once and kept across pages */
-const MODE = (() => { try { return localStorage.getItem("optex-mode") === "lo" ? "lo" : "ls"; } catch (e) { return "ls"; } })();
+/* long/short (the model) or long only (shorts held as cash): kept across pages for the current visit only, every new visit starts on long/short */
+const MODE = (() => { try { localStorage.removeItem("optex-mode"); return sessionStorage.getItem("optex-mode") === "lo" ? "lo" : "ls"; } catch (e) { return "ls"; } })();
 const LO = MODE === "lo";
 function modeBar() {
   return `<div class="seg mode" role="group" aria-label="Version"><button aria-pressed="${!LO}" data-m="ls">Long/short</button><button aria-pressed="${LO}" data-m="lo">Long only</button></div>`;
 }
 document.addEventListener("click", (ev) => {
   const b = ev.target.closest(".seg.mode button"); if (!b) return;
-  try { localStorage.setItem("optex-mode", b.dataset.m); sessionStorage.setItem("optex-scroll", String(scrollY)); } catch (e) {}
+  try { sessionStorage.setItem("optex-mode", b.dataset.m); sessionStorage.setItem("optex-scroll", String(scrollY)); } catch (e) {}
   location.reload();
 });
 // after a Long/short <-> Long only switch, come back to the same place: the page fills in asynchronously, so keep
