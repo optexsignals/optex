@@ -21,7 +21,7 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=1794142387">
+<link rel="stylesheet" href="assets/style.css?v=1794260143">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2315171a'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='white' text-anchor='middle'>O</text></svg>">
 </head>
 <body>
@@ -35,6 +35,12 @@
   <p class="kicker">Live estimate</p>
   <h1>Today's close estimate</h1>
   <p class="lede">The model run on today's prices so far, as if the market closed now. Change any price below to see how it would move the position.</p>
+  <form class="lv-gate" id="lv-gate" hidden>
+    <label>Password<input type="password" name="pw" autocomplete="current-password" required></label>
+    <button type="submit">Enter</button>
+    <p class="lv-msg lv-err" id="lv-gate-msg"></p>
+  </form>
+  <div id="lv-main" hidden>
   <section class="lv-out" id="lv-out" aria-live="polite"><p class="lv-msg">Loading live prices…</p></section>
   <form class="lv-in" id="lv-form" autocomplete="off">
     <fieldset><legend>QQQ</legend>
@@ -48,15 +54,24 @@
       <label>VIX close<input name="vix" inputmode="decimal"></label>
       <label>S&amp;P 500 close<input name="spx" inputmode="decimal"></label>
     </fieldset>
-    <div class="lv-btns"><button type="submit">Calculate</button><button type="button" id="lv-reset" class="lv-ghost">Reset to live prices</button></div>
+    <div class="lv-btns"><button type="submit">Calculate</button><button type="button" id="lv-reset" class="lv-ghost">Reset to live prices</button><button type="button" id="lv-out-btn" class="lv-ghost">Sign out</button></div>
   </form>
+  </div>
 </main>
 <style>
 .live .lv-out { border: 1px solid var(--rule); border-radius: 6px; padding: 22px 24px; margin: 8px 0 28px; max-width: 760px; background: var(--paper-2); }
 .live .lv-big { font: 400 clamp(48px, 8vw, 84px)/1 var(--serif); letter-spacing: -0.02em; margin: 2px 0 8px; }
 .live .lv-sub { color: var(--ink-2); margin: 0 0 14px; font-size: 16px; }
-.live .lv-parts { display: flex; flex-wrap: wrap; gap: 8px 26px; margin: 0; padding: 12px 0 0; border-top: 1px solid var(--rule); font-size: 15px; color: var(--ink-2); }
-.live .lv-parts b { color: var(--ink); font-weight: 600; }
+.live .lv-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 18px; margin: 0; padding: 14px 0 0; border-top: 1px solid var(--rule); }
+.live .lv-stats div { display: flex; flex-direction: column; gap: 2px; }
+.live .lv-stats dt { font-size: 13px; color: var(--ink-3); }
+.live .lv-stats dd { margin: 0; font-size: 17px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .live .lv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.live .lv-gate { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px; max-width: 760px; margin: 8px 0 28px; }
+.live .lv-gate label { flex: 0 1 280px; }
+.live .lv-gate button { font: 500 15px var(--text); padding: 10px 18px; border-radius: 4px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
+.live .lv-gate .lv-msg { flex-basis: 100%; min-height: 1em; }
+.live [hidden] { display: none !important; }
 .live .lv-msg { margin: 0; color: var(--ink-2); }
 .live .lv-err { color: var(--down); }
 .live .lv-in { max-width: 760px; }
@@ -73,8 +88,16 @@
 </style>
 <script>
 (() => {
-  const API = "/api/live/", F = ["open", "high", "low", "close", "volume", "vix", "spx"];
+  const API = "/api/live/", F = ["open", "high", "low", "close", "volume", "vix", "spx"], KS = "optex_live_key";
   const form = document.getElementById("lv-form"), out = document.getElementById("lv-out");
+  const gate = document.getElementById("lv-gate"), main = document.getElementById("lv-main"), gmsg = document.getElementById("lv-gate-msg");
+  let key = ""; try { key = localStorage.getItem(KS) || ""; } catch (e) {}
+  const H = (x) => ({ ...(x || {}), "X-Live-Key": key });
+  function lock(t) {
+    key = ""; try { localStorage.removeItem(KS); } catch (e) {}
+    main.hidden = true; gate.hidden = false; gmsg.textContent = t || ""; gate.elements.pw.value = ""; gate.elements.pw.focus();
+  }
+  function denied(r, j) { if (r.status === 401 || (r.status === 429 && /password/.test(j.error || ""))) { lock(j.error === "wrong password" ? "Wrong password." : (j.error || "")); return true; } return false; }
   let live = null, busy = false, again = false, timer = null;
   const sg = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(Math.round(v)) + "%";
   const num = (v) => Number(String(v).replace(/[, ]/g, ""));
@@ -91,7 +114,11 @@
     out.innerHTML = `<p class="kicker">${edited ? "Estimate with your prices" : "Estimate from live prices"} · ${r.date}</p>
       <div class="lv-big">${sg(r.position)}</div>
       <p class="lv-sub">${ch === 0 ? `No change from the last close (${sg(r.previous)}, ${r.previous_date})` : `${ch > 0 ? "Up" : "Down"} ${Math.abs(Math.round(ch))} points from ${sg(r.previous)} at the last close (${r.previous_date})`} · QQQ ${r.qqq_change_pct > 0 ? "+" : ""}${r.qqq_change_pct.toFixed(2)}% on the day</p>
-      <p class="lv-parts"><span>Long-term <b>${sg(r.parts.lt)}</b></span><span>Tactical <b>${sg(r.parts.st)}</b></span><span>Short <b>${sg(r.parts.short)}</b></span></p>`;
+      <dl class="lv-stats">
+        <div><dt>LT score</dt><dd>${r.lt_score}/${r.lt_max}</dd></div><div><dt>ST score</dt><dd>${r.st_score}</dd></div>
+        <div><dt>rVol</dt><dd>${r.rvol.toFixed(1)}</dd></div><div><dt>Fragility</dt><dd>${r.fragility.toFixed(2)}</dd></div>
+        <div><dt>LT exposure</dt><dd>${sg(r.parts.lt)}</dd></div><div><dt>ST exposure</dt><dd>${sg(r.parts.st)}</dd></div><div><dt>Short exposure</dt><dd>${sg(r.parts.short)}</dd></div>
+      </dl>`;
   }
   async function calc() {
     if (busy) { again = true; return; }
@@ -99,8 +126,9 @@
     for (const k of F) { const v = num(form.elements[k].value); if (!isFinite(v) || form.elements[k].value === "") { msg(`Enter a number for ${k}.`, true); return; } body[k] = v; }
     busy = true; mark();
     try {
-      const r = await fetch(API + "position", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const r = await fetch(API + "position", { method: "POST", headers: H({ "Content-Type": "application/json" }), body: JSON.stringify(body) });
       const j = await r.json();
+      if (denied(r, j)) { busy = false; return; }
       if (!r.ok) msg(j.error || "The model could not run.", true); else show(j);
     } catch (e) { msg("The live service is not reachable right now.", true); }
     busy = false;
@@ -109,16 +137,22 @@
   async function load() {
     msg("Loading live prices…");
     try {
-      const r = await fetch(API + "inputs", { cache: "no-store" });
+      const r = await fetch(API + "inputs", { cache: "no-store", headers: H() });
+      const j = await r.json();
+      if (denied(r, j)) return;
       if (!r.ok) throw new Error();
-      live = await r.json(); fill(live);
+      try { localStorage.setItem(KS, key); } catch (e) {}
+      gate.hidden = true; main.hidden = false;
+      live = j; fill(live);
       calc();
-    } catch (e) { msg("The live service is not reachable right now. Try again in a minute.", true); }
+    } catch (e) { gate.hidden = true; main.hidden = false; msg("The live service is not reachable right now. Try again in a minute.", true); }
   }
+  gate.addEventListener("submit", (e) => { e.preventDefault(); key = gate.elements.pw.value; gmsg.textContent = ""; load(); });
+  document.getElementById("lv-out-btn").addEventListener("click", () => lock(""));
   form.addEventListener("submit", (e) => { e.preventDefault(); calc(); });
   form.addEventListener("input", () => { mark(); clearTimeout(timer); timer = setTimeout(calc, 700); });
   document.getElementById("lv-reset").addEventListener("click", load);
-  load();
+  if (key) load(); else lock("");
 })();
 </script>
 <div class="lp">
@@ -136,6 +170,6 @@
   <div><span class="mark">OPTEX</span><p>Market Timing Model · long-only signals posted live on <a href="https://x.com/OptexSignals" target="_blank" rel="noopener">X @OptexSignals</a> since October 2023 · optexmodel.com · <a href="archive.html">Archive</a> · <a href="https://github.com/optexsignals/optex/commits/main/data/latest.json" target="_blank" rel="noopener">Public record on GitHub</a> · <a href="index.html#contact">Contact</a></p></div>
   <p>For information only. Not investment advice, and not an offer to buy or sell any security or fund. Performance shown is model performance, not the results of actual trading. Past performance is not a guide to the future. Trading involves risk of loss, and leverage and short selling increase it.</p>
 </div></footer>
-<script src="assets/app.js?v=1794142387"></script>
+<script src="assets/app.js?v=1794260143"></script>
 </body>
 </html>
