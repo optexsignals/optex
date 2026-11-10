@@ -3,9 +3,8 @@
  "asof": "2026-11-09",
  "published_utc": "2026-11-09T21:00:15Z",
  "preview": false,
- "provisional": true,
- "built_utc": "2026-11-09T21:00:31Z",
- "fast": true,
+ "provisional": false,
+ "built_utc": "2026-11-10T05:00:28Z",
  "position": 15.0,
  "previous": 95.0,
  "previous_date": "2026-11-06",
@@ -40,10 +39,9 @@
  "vol10": 43.9,
  "qqq_close": 679.35,
  "day": {
-  "model": 3.3665,
-  "model_lo": 3.3665,
-  "qqq": 3.54,
-  "spx": 2.3448
- },
- "run": "close"
+  "model": 3.37,
+  "model_lo": 3.37,
+  "qqq": 3.5399999618530273,
+  "spx": 2.3499999046325684
+ }
 }
