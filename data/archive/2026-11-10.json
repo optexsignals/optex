@@ -1,0 +1,49 @@
+{
+ "model": "OptEx combined (LT 9 + ST)",
+ "asof": "2026-11-10",
+ "published_utc": "2026-11-10T21:00:13Z",
+ "preview": false,
+ "provisional": true,
+ "built_utc": "2026-11-10T21:00:30Z",
+ "fast": true,
+ "position": 0.0,
+ "previous": 15.0,
+ "previous_date": "2026-11-09",
+ "previous_since": "2026-11-09",
+ "last_change": {
+  "date": "2026-11-10",
+  "from": 15.0,
+  "to": 0.0
+ },
+ "position_lo": 0.0,
+ "previous_lo": 15.0,
+ "previous_since_lo": "2026-11-09",
+ "last_change_lo": {
+  "date": "2026-11-10",
+  "from": 15.0,
+  "to": 0.0
+ },
+ "shared_since": "2023-10-10",
+ "parts": {
+  "lt": 0.0,
+  "st": 0.0,
+  "short": 0.0
+ },
+ "parts_previous": {
+  "lt": 0.0,
+  "st": 15.0,
+  "short": 0.0
+ },
+ "lt_score": 0,
+ "lt_max": 9,
+ "st_score": 5,
+ "vol10": 42.9,
+ "qqq_close": 674.77,
+ "day": {
+  "model": -0.1011,
+  "model_lo": -0.1011,
+  "qqq": -0.67,
+  "spx": -0.3817
+ },
+ "run": "close"
+}
