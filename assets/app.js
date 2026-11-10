@@ -448,7 +448,7 @@ async function record() {
     document.querySelectorAll(".optex-tg").forEach((b) => b.setAttribute("aria-pressed", showM));
     const bw = showM ? 1.3 : 1.8, bo = showM ? 0.8 : 1;
     timeChart(host, dates, [
-      { h: Math.round(340 * k), log, title: "Growth of 100", legend: (showM ? [["line", wave, NAME]] : []).concat(bms.map((x) => ["line", x.color, x.name]), marks.length && onB ? [["▲", wave, "Exposure increased"], ["▼", ink0, "Exposure reduced"]] : []),
+      { h: Math.round(340 * k), log, title: "Growth of 100", legend: (showM ? [["line", wave, NAME]] : []).concat(bms.map((x) => ["line", x.color, x.name]), marks.length && onB ? [["▲", wave, "Position increased"], ["▼", ink0, "Position reduced"]] : []),
         fmt: log ? (v) => Math.round(10 ** v).toLocaleString() : (v) => v.toFixed(0), series: bms.map((x) => ({ name: x.name, v: x.g, color: x.color, w: bw, opacity: bo, marks: x === onB ? marks : null, tipFmt: (v) => pct(v - 100, 1) })).concat(showM ? [
         { name: NAME, v: m, color: wave, w: 3, halo: true, tipFmt: (v) => pct(v - 100, 1) }] : []) },
       { h: Math.round(130 * k), title: "Drawdown", fmt: (v) => v.toFixed(0).replace("-", "−") + "%", zero: true, max: 0, series: bms.map((x) => ({ name: x.name + " drawdown", v: ddOf(x.g), color: x.color, w: 1.2, tipFmt: pf })).concat(showM ? [
