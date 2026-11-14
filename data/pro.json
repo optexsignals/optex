@@ -34,7 +34,7 @@
     "beta_spx_m": 0.0015,
     "corr_spx_m": 0.0009,
     "upcap_spx": 99.5814,
-    "downcap_spx": -81.6
+    "downcap_spx": -81.6014
    },
    "model_lo": {
     "start": "2000-03-09",
@@ -68,7 +68,7 @@
     "beta_spx_m": 0.5349,
     "corr_spx_m": 0.4882,
     "upcap_spx": 109.3226,
-    "downcap_spx": 4.2985
+    "downcap_spx": 4.2986
    },
    "qqq": {
     "start": "2000-03-09",
@@ -94,12 +94,12 @@
     "beta_spx_m": 1.2909,
     "corr_spx_m": 0.8604,
     "upcap_spx": 126.2922,
-    "downcap_spx": 142.3634
+    "downcap_spx": 142.3659
    },
    "spx": {
     "start": "2000-03-09",
     "end": "2026-11-13",
-    "cagr": 8.6024,
+    "cagr": 8.6027,
     "vol": 19.1855,
     "sharpe": 0.5263,
     "sortino": 0.6686,
@@ -258,11 +258,11 @@
     "beta_spx": 0.4832,
     "corr_spx": 0.3586,
     "beta_up_spx": 0.6877,
-    "beta_down_spx": -0.0409,
+    "beta_down_spx": -0.0408,
     "beta_spx_m": 0.3343,
     "corr_spx_m": 0.2153,
     "upcap_spx": 113.3064,
-    "downcap_spx": -92.8889
+    "downcap_spx": -92.8977
    },
    "model_lo": {
     "start": "2022-01-03",
@@ -296,7 +296,7 @@
     "beta_spx_m": 0.7092,
     "corr_spx_m": 0.6119,
     "upcap_spx": 124.4826,
-    "downcap_spx": -5.0613
+    "downcap_spx": -5.0617
    },
    "qqq": {
     "start": "2022-01-03",
@@ -322,15 +322,15 @@
     "beta_spx_m": 1.2546,
     "corr_spx_m": 0.917,
     "upcap_spx": 122.3054,
-    "downcap_spx": 131.2393
+    "downcap_spx": 131.2517
    },
    "spx": {
     "start": "2022-01-03",
     "end": "2026-11-13",
-    "cagr": 11.5619,
-    "vol": 17.1758,
-    "sharpe": 0.7229,
-    "sortino": 0.9935,
+    "cagr": 11.5636,
+    "vol": 17.1757,
+    "sharpe": 0.723,
+    "sortino": 0.9936,
     "maxdd": -24.4918,
     "calmar": 0.4721,
     "longest_dd": 488,
@@ -369,14 +369,14 @@
     "corr_qqq_m": 0.4853,
     "upcap_qqq": 122.8033,
     "downcap_qqq": 16.3544,
-    "beta_spx": 0.9475,
+    "beta_spx": 0.9476,
     "corr_spx": 0.6404,
     "beta_up_spx": 1.2699,
     "beta_down_spx": 0.46,
-    "beta_spx_m": 0.9283,
-    "corr_spx_m": 0.4743,
+    "beta_spx_m": 0.9285,
+    "corr_spx_m": 0.4744,
     "upcap_spx": 112.1346,
-    "downcap_spx": -116.2887
+    "downcap_spx": -116.3218
    },
    "model_lo": {
     "start": "2023-10-10",
@@ -407,10 +407,10 @@
     "corr_spx": 0.8007,
     "beta_up_spx": 1.3411,
     "beta_down_spx": 0.7569,
-    "beta_spx_m": 1.1589,
-    "corr_spx_m": 0.7395,
+    "beta_spx_m": 1.159,
+    "corr_spx_m": 0.7396,
     "upcap_spx": 122.0172,
-    "downcap_spx": 5.323
+    "downcap_spx": 5.3245
    },
    "qqq": {
     "start": "2023-10-10",
@@ -436,17 +436,17 @@
     "beta_spx_m": 1.3044,
     "corr_spx_m": 0.9041,
     "upcap_spx": 117.6523,
-    "downcap_spx": 140.6962
+    "downcap_spx": 140.7363
    },
    "spx": {
     "start": "2023-10-10",
     "end": "2026-11-13",
-    "cagr": 21.2964,
-    "vol": 15.1575,
-    "sharpe": 1.3497,
-    "sortino": 1.7637,
+    "cagr": 21.2995,
+    "vol": 15.1574,
+    "sharpe": 1.3499,
+    "sortino": 1.7639,
     "maxdd": -18.7472,
-    "calmar": 1.136,
+    "calmar": 1.1361,
     "longest_dd": 87,
     "worst_month": -5.6345,
     "best_month": 10.4925,
@@ -547,7 +547,7 @@
      "maxdd": -14.6823
     },
     "live": {
-     "cagr": 51.3419,
+     "cagr": 51.3418,
      "sharpe": 1.96,
      "maxdd": -14.6823
     }
@@ -641,7 +641,7 @@
      "maxdd": -14.7768
     },
     "live": {
-     "cagr": 49.0953,
+     "cagr": 49.0952,
      "sharpe": 1.8928,
      "maxdd": -14.7768
     }
@@ -1805,8 +1805,8 @@
     "maxdd": -29.7953
    },
    "next_open": {
-    "cagr": 43.4662,
-    "sharpe": 1.5613,
+    "cagr": 43.393,
+    "sharpe": 1.5593,
     "maxdd": -27.8473
    }
   },
@@ -1829,8 +1829,8 @@
     "maxdd": -14.5343
    },
    "next_open": {
-    "cagr": 49.6427,
-    "sharpe": 1.8734,
+    "cagr": 49.2186,
+    "sharpe": 1.861,
     "maxdd": -16.1585
    }
   },
@@ -1841,8 +1841,8 @@
     "maxdd": -14.5343
    },
    "next_open": {
-    "cagr": 41.6411,
-    "sharpe": 1.7111,
+    "cagr": 41.021,
+    "sharpe": 1.6909,
     "maxdd": -16.1585
    }
   }
