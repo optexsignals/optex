@@ -1,32 +1,33 @@
 {
  "model": "OptEx combined (LT 9 + ST)",
- "asof": "2026-11-13",
- "published_utc": "2026-11-13T21:00:13Z",
+ "asof": "2026-11-16",
+ "published_utc": "2026-11-16T21:00:14Z",
  "preview": false,
- "provisional": false,
- "built_utc": "2026-11-14T05:00:29Z",
- "position": -100.0,
+ "provisional": true,
+ "built_utc": "2026-11-16T21:00:29Z",
+ "fast": true,
+ "position": 50.0,
  "previous": -100.0,
- "previous_date": "2026-11-12",
+ "previous_date": "2026-11-13",
  "previous_since": "2026-11-11",
  "last_change": {
-  "date": "2026-11-11",
-  "from": 0.0,
-  "to": -100.0
+  "date": "2026-11-16",
+  "from": -100.0,
+  "to": 50.0
  },
- "position_lo": 0.0,
+ "position_lo": 50.0,
  "previous_lo": 0.0,
  "previous_since_lo": "2026-11-10",
  "last_change_lo": {
-  "date": "2026-11-10",
-  "from": 15.0,
-  "to": 0.0
+  "date": "2026-11-16",
+  "from": 0.0,
+  "to": 50.0
  },
  "shared_since": "2023-10-10",
  "parts": {
   "lt": 0.0,
-  "st": 0.0,
-  "short": -100.0
+  "st": 50.0,
+  "short": 0.0
  },
  "parts_previous": {
   "lt": 0.0,
@@ -35,13 +36,14 @@
  },
  "lt_score": 0,
  "lt_max": 9,
- "st_score": 0,
- "vol10": 41.8,
- "qqq_close": 679.89,
+ "st_score": 8,
+ "vol10": 43.2,
+ "qqq_close": 661.75,
  "day": {
-  "model": 1.2,
+  "model": 2.6681,
   "model_lo": -0.0,
-  "qqq": -1.2000000476837158,
-  "spx": -0.38999998569488525
- }
+  "qqq": -2.67,
+  "spx": -1.9116
+ },
+ "run": "close"
 }
