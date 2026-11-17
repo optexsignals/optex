@@ -550,7 +550,7 @@ function renderProStats(root) {
     const strat = `<table class="quant split-t"><tr><th class="l"></th><th>Long-term</th><th>Tactical</th><th>Short</th></tr>
       <tr><td class="l">Share of days active</td><td>${pct(E.pct_lt_on, 0, false)}</td><td>${pct(E.pct_st_on, 0, false)}</td><td>${pct(E.pct_short_on, 0, false)}</td></tr>
       <tr><td class="l">Average holding, trading days</td><td>${Math.round(E.lt_spell_days)}</td><td>${Math.round(E.st_spell_days)}</td><td>${Math.round(E.short_spell_days)}</td></tr>
-      <tr><td class="l">Contribution a year, simple</td>${["lt", "st", "short"].map((k) => `<td><b>${pct(J.strategies[k].full.ann_contrib, 1)}</b></td>`).join("")}</tr>
+      <tr><td class="l">Annual contribution (simple)</td>${["lt", "st", "short"].map((k) => `<td><b>${pct(J.strategies[k].full.ann_contrib, 1)}</b></td>`).join("")}</tr>
       <tr><td class="l">Sharpe ratio of the contribution</td>${["lt", "st", "short"].map((k) => `<td>${num(J.strategies[k].full.sharpe)}</td>`).join("")}</tr></table>`;
 
 
@@ -562,10 +562,10 @@ function renderProStats(root) {
       <tr><td class="l" title="Coefficient on QQQ's squared return in a regression of the model's daily return on QQQ's return and its square. A significantly positive value indicates convexity: exposure rises ahead of up moves and falls ahead of down moves, a return profile similar to a long option position.">Treynor–Mazuy timing coefficient</td>${tc.map(([k]) => `<td><b>${tv(T[k].tm_gamma, T[k].tm_t)}</b></td>`).join("")}</tr>
       <tr><td class="l" title="Separate betas for days QQQ rises and days it falls. Higher beta on up days than on down days is market timing; the t-statistic is for the difference between the two.">Beta on QQQ up days (Henriksson–Merton)</td>${tc.map(([k]) => `<td>${tv(T[k].hm_beta_up, T[k].hm_t)}</td>`).join("")}</tr>
       <tr><td class="l" title="How much of QQQ's move the model takes on days QQQ falls. Near zero means it captures little of the down days.">Beta on QQQ down days</td>${tc.map(([k]) => `<td>${num(T[k].hm_beta_down)}</td>`).join("")}</tr>
-      <tr><td class="l" title="Trend rule: QQQ when above its 200-day average, otherwise cash">Alpha a year after QQQ and a 200-day trend rule</td>${tc.map(([k]) => `<td><b>${tv(T[k].alpha_trend, T[k].alpha_trend_t, (x) => pct(x, 1))}</b></td>`).join("")}</tr>
-      <tr><td class="l" title="Fama-French five, momentum, short-term reversal, betting-against-beta">Alpha a year after eight equity factors</td>${tc.map(([k]) => `<td>${fa(k)}</td>`).join("")}</tr></table>`;
+      <tr><td class="l" title="Trend rule: QQQ when above its 200-day average, otherwise cash">Annualized alpha vs. QQQ and a 200-day trend rule</td>${tc.map(([k]) => `<td><b>${tv(T[k].alpha_trend, T[k].alpha_trend_t, (x) => pct(x, 1))}</b></td>`).join("")}</tr>
+      <tr><td class="l" title="Fama-French five, momentum, short-term reversal, betting-against-beta">Annualized alpha vs. eight equity factors</td>${tc.map(([k]) => `<td>${fa(k)}</td>`).join("")}</tr></table>`;
     const BP = T && T.model.by_position;
-    const bypos = !T ? "" : `<table class="quant split-t"><tr><th class="l">Model position</th><th>Share of days</th><th>QQQ a year*</th></tr>
+    const bypos = !T ? "" : `<table class="quant split-t"><tr><th class="l">Model position</th><th>Share of days</th><th>QQQ annualized return*</th></tr>
       ${[["above_100", "Above 100% long"], ["long", "Long, up to 100%"], ["flat", "Flat"], ["short", "Short"]].map(([k, n]) =>
         `<tr><td class="l">${n}</td><td>${pct(BP[k].pct_days, 0, false)}</td><td><b class="${tone(BP[k].qqq_ann)}">${pct(BP[k].qqq_ann, 0)}</b></td></tr>`).join("")}</table>
       <p class="note">* QQQ's average daily return on those days, annualized.</p>`;
