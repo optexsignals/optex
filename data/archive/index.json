@@ -71,5 +71,14 @@
   "provisional": true,
   "published_utc": "2026-11-16T21:00:14Z",
   "corrected_from": 50.0
+ },
+ {
+  "asof": "2026-11-17",
+  "position": 65.0,
+  "previous": 30.0,
+  "day": -0.2176,
+  "qqq_day": -0.73,
+  "provisional": true,
+  "published_utc": "2026-11-17T21:00:15Z"
  }
 ]
