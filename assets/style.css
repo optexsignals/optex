@@ -656,3 +656,8 @@ html[data-site="pro"] .lp-hero-text .lp-hero-side { justify-self: end; width: 10
 .cm-bar .optex-tg[aria-pressed="true"], .cm-bar .arrows-tg[aria-pressed="true"] { color: var(--wave); border-color: var(--wave); }
 .arrows-tg + .cm-close { margin-left: 0; }
 .cm-bar .optex-tg + .arrows-tg { margin-left: -8px; }
+
+/* pro home: no rules above the "What it delivers" tiles (Steve 2026-11-17) */
+#capture { gap: 0; }
+#capture > div { border-top: 0; padding: 0 16px; text-align: center; }   /* centered, same columns as the headline stats */
+@media (max-width: 900px) { #capture { gap: 32px 0; } }
