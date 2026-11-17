@@ -34,7 +34,7 @@
     "beta_spx_m": -0.0016,
     "corr_spx_m": -0.0009,
     "upcap_spx": 99.5814,
-    "downcap_spx": -81.8779
+    "downcap_spx": -81.8794
    },
    "model_lo": {
     "start": "2000-03-09",
@@ -68,7 +68,7 @@
     "beta_spx_m": 0.5329,
     "corr_spx_m": 0.4867,
     "upcap_spx": 109.3226,
-    "downcap_spx": 4.2802
+    "downcap_spx": 4.2803
    },
    "qqq": {
     "start": "2000-03-09",
@@ -94,12 +94,12 @@
     "beta_spx_m": 1.2913,
     "corr_spx_m": 0.8606,
     "upcap_spx": 126.2922,
-    "downcap_spx": 142.3462
+    "downcap_spx": 142.3487
    },
    "spx": {
     "start": "2000-03-09",
     "end": "2026-11-16",
-    "cagr": 8.5227,
+    "cagr": 8.523,
     "vol": 19.1878,
     "sharpe": 0.5224,
     "sortino": 0.6637,
@@ -262,7 +262,7 @@
     "beta_spx_m": 0.3163,
     "corr_spx_m": 0.2031,
     "upcap_spx": 113.3064,
-    "downcap_spx": -94.1093
+    "downcap_spx": -94.1181
    },
    "model_lo": {
     "start": "2022-01-03",
@@ -294,9 +294,9 @@
     "beta_up_spx": 0.969,
     "beta_down_spx": 0.4405,
     "beta_spx_m": 0.6984,
-    "corr_spx_m": 0.6046,
+    "corr_spx_m": 0.6047,
     "upcap_spx": 124.4826,
-    "downcap_spx": -4.9452
+    "downcap_spx": -4.9457
    },
    "qqq": {
     "start": "2022-01-03",
@@ -322,15 +322,15 @@
     "beta_spx_m": 1.2571,
     "corr_spx_m": 0.9177,
     "upcap_spx": 122.3054,
-    "downcap_spx": 131.4207
+    "downcap_spx": 131.433
    },
    "spx": {
     "start": "2022-01-03",
     "end": "2026-11-16",
-    "cagr": 11.1109,
-    "vol": 17.1918,
-    "sharpe": 0.6988,
-    "sortino": 0.9604,
+    "cagr": 11.1127,
+    "vol": 17.1916,
+    "sharpe": 0.6989,
+    "sortino": 0.9605,
     "maxdd": -24.4918,
     "calmar": 0.4537,
     "longest_dd": 488,
@@ -340,7 +340,7 @@
     "worst_year": -18.1111,
     "worst_day": -5.9616,
     "best_day": 9.5168,
-    "skew": 0.133
+    "skew": 0.1331
    }
   },
   "live": {
@@ -369,14 +369,14 @@
     "corr_qqq_m": 0.4512,
     "upcap_qqq": 122.8033,
     "downcap_qqq": 10.1119,
-    "beta_spx": 0.9353,
+    "beta_spx": 0.9354,
     "corr_spx": 0.6327,
     "beta_up_spx": 1.2699,
-    "beta_down_spx": 0.4337,
-    "beta_spx_m": 0.8644,
-    "corr_spx_m": 0.4418,
+    "beta_down_spx": 0.4339,
+    "beta_spx_m": 0.8646,
+    "corr_spx_m": 0.4419,
     "upcap_spx": 112.1346,
-    "downcap_spx": -118.0512
+    "downcap_spx": -118.083
    },
    "model_lo": {
     "start": "2023-10-10",
@@ -406,11 +406,11 @@
     "beta_spx": 1.1125,
     "corr_spx": 0.7988,
     "beta_up_spx": 1.3411,
-    "beta_down_spx": 0.7453,
-    "beta_spx_m": 1.1188,
-    "corr_spx_m": 0.7219,
+    "beta_down_spx": 0.7454,
+    "beta_spx_m": 1.119,
+    "corr_spx_m": 0.722,
     "upcap_spx": 122.0172,
-    "downcap_spx": 4.9711
+    "downcap_spx": 4.9724
    },
    "qqq": {
     "start": "2023-10-10",
@@ -432,29 +432,29 @@
     "beta_spx": 1.3098,
     "corr_spx": 0.9481,
     "beta_up_spx": 1.2936,
-    "beta_down_spx": 1.2838,
-    "beta_spx_m": 1.3092,
+    "beta_down_spx": 1.2839,
+    "beta_spx_m": 1.3093,
     "corr_spx_m": 0.9064,
     "upcap_spx": 117.6523,
-    "downcap_spx": 140.619
+    "downcap_spx": 140.6569
    },
    "spx": {
     "start": "2023-10-10",
     "end": "2026-11-16",
-    "cagr": 20.5146,
-    "vol": 15.19,
-    "sharpe": 1.3045,
-    "sortino": 1.7035,
+    "cagr": 20.5176,
+    "vol": 15.1897,
+    "sharpe": 1.3047,
+    "sortino": 1.7038,
     "maxdd": -18.7472,
-    "calmar": 1.0943,
+    "calmar": 1.0944,
     "longest_dd": 87,
     "worst_month": -5.6345,
     "best_month": 10.4925,
     "pos_months": 63.1579,
-    "worst_year": 9.412,
+    "worst_year": 9.4206,
     "worst_day": -5.9616,
     "best_day": 9.5168,
-    "skew": 0.4242
+    "skew": 0.4243
    }
   }
  },
@@ -1805,8 +1805,8 @@
     "maxdd": -29.7953
    },
    "next_open": {
-    "cagr": 43.393,
-    "sharpe": 1.5593,
+    "cagr": 43.5205,
+    "sharpe": 1.5627,
     "maxdd": -27.8473
    }
   },
@@ -1829,8 +1829,8 @@
     "maxdd": -14.5343
    },
    "next_open": {
-    "cagr": 49.2186,
-    "sharpe": 1.861,
+    "cagr": 49.9432,
+    "sharpe": 1.881,
     "maxdd": -16.1585
    }
   },
@@ -1841,8 +1841,8 @@
     "maxdd": -14.5343
    },
    "next_open": {
-    "cagr": 41.021,
-    "sharpe": 1.6909,
+    "cagr": 42.1079,
+    "sharpe": 1.7243,
     "maxdd": -16.1585
    }
   }

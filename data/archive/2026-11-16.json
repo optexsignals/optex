@@ -45,5 +45,14 @@
   "qqq": -2.67,
   "spx": -1.9116
  },
- "run": "close"
+ "run": "close",
+ "correction": {
+  "utc": "2026-11-17T05:00:04Z",
+  "position": 30.0,
+  "parts": {
+   "lt": 0.0,
+   "st": 30.0,
+   "short": 0.0
+  }
+ }
 }

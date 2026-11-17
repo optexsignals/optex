@@ -64,11 +64,12 @@
  },
  {
   "asof": "2026-11-16",
-  "position": 50.0,
+  "position": 30.0,
   "previous": -100.0,
   "day": 2.6681,
   "qqq_day": -2.67,
   "provisional": true,
-  "published_utc": "2026-11-16T21:00:14Z"
+  "published_utc": "2026-11-16T21:00:14Z",
+  "corrected_from": 50.0
  }
 ]
