@@ -357,7 +357,17 @@ function positionChange(now, next) {          // now = position held into the cl
   if (Math.sign(now) !== Math.sign(next)) return `Flip from ${pct(now)} to ${pct(next)}`;
   return `${Math.abs(next) > Math.abs(now) ? "Increase" : "Reduce"} the ${next < 0 ? "short" : "long"} from ${pct(now)} to ${pct(next)}`;
 }
+function revise(s) {   // archived day the midnight rerun changed: show the revised position, keep what was published at the close
+  const c = s.correction;
+  if (!c) return s;
+  const lc = (prev, to, old) => Math.abs(to - prev) >= 0.5 ? { date: s.asof, from: prev, to } : old && old.date !== s.asof ? old : null;
+  const lo = c.parts.lt + c.parts.st;
+  return { ...s, position: c.position, parts: c.parts, last_change: lc(s.previous, c.position, s.last_change),
+    position_lo: s.position_lo != null ? lo : null, last_change_lo: s.position_lo != null ? lc(s.previous_lo, lo, s.last_change_lo) : null,
+    revised: { utc: c.utc, from: s.position, from_lo: s.position_lo } };
+}
 function renderPosition(s, root, { archived = false } = {}) {
+  s = revise(s);
   if (LO && s.position_lo != null) s = { ...s, position: s.position_lo, previous: s.previous_lo, previous_since: s.previous_since_lo ?? s.previous_since, last_change: s.last_change_lo ?? s.last_change, parts: { ...s.parts, short: 0 }, day: { ...s.day, model: s.day.model_lo ?? s.day.model }, loShort: s.parts.short < -0.5 };
   const P = s.parts, x = s.position;
   const when = s.published_utc ? `Published ${new Date(s.published_utc).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} ET`
@@ -369,6 +379,7 @@ function renderPosition(s, root, { archived = false } = {}) {
     <h1 class="when">${day(s.asof)}</h1>
     <p class="kicker pub">${when}</p>
     <div class="pos-mode">${modeBar()}</div>
+    ${s.revised && Math.abs((LO && s.revised.from_lo != null ? s.revised.from_lo : s.revised.from) - s.position) >= 0.5 ? `<p class="prov-note rev-note"><b>Revised.</b> Published at the close as ${pct(LO && s.revised.from_lo != null ? s.revised.from_lo : s.revised.from)}. The midnight rerun on final market data (${new Date(s.revised.utc).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} ET) changed it to ${pct(s.position)}, and the revision was emailed.</p>` : ""}
     ${s.provisional && !archived ? `<p class="prov-note">Provisional. The model reruns on final market data at midnight New York time. A change is rare, about once or twice a year, and would be emailed straight away.</p>` : ""}
     ${archived ? `<a class="banner" href="position.html">This is an archived day. See the current position →</a>` : ""}
   </div>
