@@ -34,7 +34,7 @@
     "beta_spx_m": -0.0029,
     "corr_spx_m": -0.0016,
     "upcap_spx": 99.5814,
-    "downcap_spx": -81.6419
+    "downcap_spx": -81.6412
    },
    "model_lo": {
     "start": "2000-03-09",
@@ -68,7 +68,7 @@
     "beta_spx_m": 0.5317,
     "corr_spx_m": 0.486,
     "upcap_spx": 109.3226,
-    "downcap_spx": 4.3206
+    "downcap_spx": 4.3205
    },
    "qqq": {
     "start": "2000-03-09",
@@ -94,13 +94,13 @@
     "beta_spx_m": 1.2911,
     "corr_spx_m": 0.8607,
     "upcap_spx": 126.2922,
-    "downcap_spx": 142.184
+    "downcap_spx": 142.1828
    },
    "spx": {
     "start": "2000-03-09",
     "end": "2026-11-17",
-    "cagr": 8.4799,
-    "vol": 19.1874,
+    "cagr": 8.4798,
+    "vol": 19.1875,
     "sharpe": 0.5203,
     "sortino": 0.6612,
     "maxdd": -55.2502,
@@ -262,7 +262,7 @@
     "beta_spx_m": 0.3086,
     "corr_spx_m": 0.1989,
     "upcap_spx": 113.3064,
-    "downcap_spx": -92.7075
+    "downcap_spx": -92.7032
    },
    "model_lo": {
     "start": "2022-01-03",
@@ -292,11 +292,11 @@
     "beta_spx": 0.8209,
     "corr_spx": 0.695,
     "beta_up_spx": 0.969,
-    "beta_down_spx": 0.4402,
+    "beta_down_spx": 0.4401,
     "beta_spx_m": 0.6919,
     "corr_spx_m": 0.6012,
     "upcap_spx": 124.4826,
-    "downcap_spx": -4.62
+    "downcap_spx": -4.6198
    },
    "qqq": {
     "start": "2022-01-03",
@@ -322,17 +322,17 @@
     "beta_spx_m": 1.2564,
     "corr_spx_m": 0.9183,
     "upcap_spx": 122.3054,
-    "downcap_spx": 130.6934
+    "downcap_spx": 130.6874
    },
    "spx": {
     "start": "2022-01-03",
     "end": "2026-11-17",
-    "cagr": 10.8687,
+    "cagr": 10.8678,
     "vol": 17.1914,
-    "sharpe": 0.6861,
-    "sortino": 0.9437,
+    "sharpe": 0.686,
+    "sortino": 0.9436,
     "maxdd": -24.4918,
-    "calmar": 0.4438,
+    "calmar": 0.4437,
     "longest_dd": 488,
     "worst_month": -9.2097,
     "best_month": 10.4925,
@@ -370,13 +370,13 @@
     "upcap_qqq": 122.8033,
     "downcap_qqq": 10.4067,
     "beta_spx": 0.9344,
-    "corr_spx": 0.6326,
+    "corr_spx": 0.6325,
     "beta_up_spx": 1.2699,
     "beta_down_spx": 0.4329,
-    "beta_spx_m": 0.8354,
-    "corr_spx_m": 0.4311,
+    "beta_spx_m": 0.8353,
+    "corr_spx_m": 0.431,
     "upcap_spx": 112.1346,
-    "downcap_spx": -113.3062
+    "downcap_spx": -113.2914
    },
    "model_lo": {
     "start": "2023-10-10",
@@ -407,10 +407,10 @@
     "corr_spx": 0.7985,
     "beta_up_spx": 1.3411,
     "beta_down_spx": 0.7439,
-    "beta_spx_m": 1.0945,
-    "corr_spx_m": 0.7128,
+    "beta_spx_m": 1.0944,
+    "corr_spx_m": 0.7127,
     "upcap_spx": 122.0172,
-    "downcap_spx": 5.5407
+    "downcap_spx": 5.54
    },
    "qqq": {
     "start": "2023-10-10",
@@ -436,22 +436,22 @@
     "beta_spx_m": 1.3056,
     "corr_spx_m": 0.9078,
     "upcap_spx": 117.6523,
-    "downcap_spx": 138.2639
+    "downcap_spx": 138.2458
    },
    "spx": {
     "start": "2023-10-10",
     "end": "2026-11-17",
-    "cagr": 20.0902,
-    "vol": 15.1928,
-    "sharpe": 1.2811,
-    "sortino": 1.6752,
+    "cagr": 20.0886,
+    "vol": 15.1929,
+    "sharpe": 1.281,
+    "sortino": 1.6751,
     "maxdd": -18.7472,
     "calmar": 1.0716,
     "longest_dd": 87,
     "worst_month": -5.6345,
     "best_month": 10.4925,
     "pos_months": 63.1579,
-    "worst_year": 8.3039,
+    "worst_year": 8.2997,
     "worst_day": -5.9616,
     "best_day": 9.5168,
     "skew": 0.426
@@ -641,7 +641,7 @@
      "maxdd": -14.7768
     },
     "live": {
-     "cagr": 50.0988,
+     "cagr": 50.0989,
      "sharpe": 1.9213,
      "maxdd": -14.7768
     }
@@ -1805,8 +1805,8 @@
     "maxdd": -29.7953
    },
    "next_open": {
-    "cagr": 43.5205,
-    "sharpe": 1.5627,
+    "cagr": 43.5765,
+    "sharpe": 1.5643,
     "maxdd": -27.8473
    }
   },
@@ -1829,8 +1829,8 @@
     "maxdd": -14.5343
    },
    "next_open": {
-    "cagr": 49.9432,
-    "sharpe": 1.881,
+    "cagr": 50.2593,
+    "sharpe": 1.8906,
     "maxdd": -16.1585
    }
   },
@@ -1841,8 +1841,8 @@
     "maxdd": -14.5343
    },
    "next_open": {
-    "cagr": 42.1079,
-    "sharpe": 1.7243,
+    "cagr": 42.5881,
+    "sharpe": 1.7402,
     "maxdd": -16.1585
    }
   }
