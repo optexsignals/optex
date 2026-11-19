@@ -1756,5 +1756,19 @@
 "day": -0.62,
 "spx_day": -1.02,
 "n_orders": 1
+},
+{
+"asof": "2026-11-18",
+"next_session": "2026-11-19",
+"call": "no big call",
+"optex": 65.0,
+"net_target_next": 0.0,
+"net_next": -0.0,
+"lv_next": 16.9,
+"har_next": 9.3,
+"nq_next": -26.2,
+"day": -0.49,
+"spx_day": -0.22,
+"n_orders": 3
 }
 ]
